@@ -1,53 +1,39 @@
 // src/app/therapists/page.tsx
-import ClientFilters from '@/components/ClientFilters';
-import { prisma } from '@/lib/prisma';
-import Image from 'next/image';
-import Link from 'next/link';
-import type { Metadata } from 'next';
+import ClientFilters from '@/components/ClientFilters'
+import { prisma } from '@/lib/prisma'
+import Image from 'next/image'
+import Link from 'next/link'
+import type { Metadata } from 'next'
 
-interface TherapistsPageProps {
-  searchParams: { zip?: string };
-}
-
-/* -------------------------------------------------------------------------- */
-/* 1. Dynamic <head> metadata                                                 */
-/* -------------------------------------------------------------------------- */
-export async function generateMetadata(
-  { searchParams }: TherapistsPageProps
-): Promise<Metadata> {
-  const zip = searchParams.zip;
+/* 1. Dynamic <head> metadata */
+export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
+  const zip = searchParams.zip
   return {
     title: zip
       ? `Therapists near ${zip} | TherapistDB`
       : 'Find a Therapist | TherapistDB',
     description: zip
-      ? `Browse licensed mental‑health professionals near zip code ${zip}.`
-      : 'Browse licensed therapists and counselors to find the right mental‑health support for you.',
-  };
+      ? `Browse licensed mental-health professionals near zip code ${zip}.`
+      : 'Browse licensed therapists and counselors to find the right mental-health support for you.',
+  }
 }
 
-/* -------------------------------------------------------------------------- */
-/* 2. Page component (server)                                                 */
-/* -------------------------------------------------------------------------- */
-export default async function TherapistsPage(
-  { searchParams }: TherapistsPageProps
-) {
-  const zip = searchParams.zip;
+/* 2. Page component (server) */
+export default async function TherapistsPage({ searchParams }: any) {
+  const zip = typeof searchParams.zip === 'string' ? searchParams.zip : undefined
 
-  /* ---------- Prisma query: ONLY published & non‑empty slug --------------- */
   const where = {
     published: true,
     slug:      { not: '' },
-    ...(zip && { zipCode: zip }),            // optional ZIP filter
-  } as const;
+    ...(zip && { zipCode: zip }),
+  } as const
 
   const therapists = await prisma.therapist.findMany({
     where,
     orderBy: { name: 'asc' },
     take: 50,
-  });
+  })
 
-  /* ----------------------------------------------------------------------- */
   return (
     <main className="bg-[#F9FAF9] min-h-screen px-4 py-12 font-sans">
       <div className="max-w-6xl mx-auto">
@@ -56,7 +42,7 @@ export default async function TherapistsPage(
           {zip ? `Therapists near ${zip}` : 'Find a Mental Health Professional'}
         </h1>
 
-        {/* 3. Client‑side filters */}
+        {/* 3. Client-side filters */}
         <ClientFilters />
 
         {/* 4. Therapist listings or empty state */}
@@ -133,5 +119,5 @@ export default async function TherapistsPage(
         </section>
       </div>
     </main>
-  );
+  )
 }
