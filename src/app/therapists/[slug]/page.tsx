@@ -5,8 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
-export default async function TherapistProfilePage({ params }: { params: { slug: string } }) {
-  const therapist = await prisma.therapist.findUnique({
+interface PageProps {
+    params: { slug: string }
+  }
+  
+  export default async function TherapistProfilePage({ params }: PageProps) {
+    const therapist = await prisma.therapist.findUnique({
     where: { slug: params.slug },
     select: {
       id: true,
