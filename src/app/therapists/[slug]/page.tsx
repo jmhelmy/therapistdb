@@ -1,17 +1,14 @@
-
-
+// src/app/therapists/[slug]/page.tsx
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
-interface PageProps {
-    params: { slug: string }
-  }
-  
-  export default async function TherapistProfilePage({ params }: PageProps) {
-    const therapist = await prisma.therapist.findUnique({
-    where: { slug: params.slug },
+export default async function TherapistProfilePage({ params }: any) {
+  const slug = String(params.slug)
+
+  const therapist = await prisma.therapist.findUnique({
+    where: { slug },
     select: {
       id: true,
       userId: true,
@@ -54,7 +51,7 @@ interface PageProps {
       nearbyNeighborhoods: true,
       locationNote: true,
       education: true,
-      yearsInPractice: true
+      yearsInPractice: true,
     },
   })
 
@@ -68,19 +65,15 @@ interface PageProps {
           {therapist.state ?? 'Unknown State'} &gt; {therapist.city ?? 'Unknown City'} &gt; {therapist.name}
         </nav>
 
-{/* Disclaimer & Claim CTA */}
-{!therapist.userId && (
-  <div className="bg-[#e6dbf9] border border-[#c9b8ec] text-sm text-gray-700 p-4 rounded-md">
-    This profile for <strong>{therapist.name}</strong> was pulled from public data.
-    If it’s yours you can{' '}
-    <Link
-      href={`/claim/${therapist.id}`}   // ← still passes the id
-      className="underline text-purple-800"
-    >
-      claim or edit it here
-    </Link>.
-  </div>
-)}
+        {/* Claim CTA */}
+        {!therapist.userId && (
+          <div className="bg-[#e6dbf9] border border-[#c9b8ec] text-sm text-gray-700 p-4 rounded-md">
+            This profile for <strong>{therapist.name}</strong> was pulled from public data. If it’s yours you can{' '}
+            <Link href={`/claim/${therapist.id}`} className="underline text-purple-800">
+              claim or edit it here
+            </Link>.
+          </div>
+        )}
 
         {/* Header Card */}
         <div className="relative text-center border border-gray-100 shadow-sm rounded-md bg-white overflow-hidden">
