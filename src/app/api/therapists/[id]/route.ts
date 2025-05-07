@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// ✅ THIS WORKS with App Router
 export async function GET(
   req: NextRequest,
-  { params }: { params: Record<string, string> }
+  context: any
 ) {
-  const id = params.id
+  const id = context.params?.id
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing ID' }, { status: 400 })
+  }
 
   const therapist = await prisma.therapist.findUnique({
     where: { id },
