@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "import:csv": "ts-node scripts/importCsv.ts",
     "seed": "ts-node -P tsconfig.seed.json prisma/seed.ts"
   },
+  "postinstall": "prisma generate",
   "dependencies": {
     "@prisma/client": "^6.7.0",
     "bcryptjs": "^3.0.2",
