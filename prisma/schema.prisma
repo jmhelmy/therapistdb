@@ -1,0 +1,74 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  name      String?
+  createdAt DateTime   @default(now())
+  therapist Therapist?
+}
+
+model Therapist {
+  id                   String     @id @default(uuid())
+  name                 String
+  slug                 String     @unique
+  imageUrl             String?
+  city                 String?
+  state                String?
+  licenseStatus        String?
+  licenseNumber        String?
+  licenseState         String?
+  licenseExpiration    DateTime?
+  primaryCredential    String?
+  description          String?
+  professions          String?
+  title                String?
+  credentials          String?
+  mentalHealthRole     String?
+  phone                String?
+  education            String?
+  yearsInPractice      String?
+  primaryOffice        String?
+  additionalOffice     String?
+  telephone            String?
+  billing              String?
+  fees                 String?
+  paymentMethods       String[]
+  insurance            String[]
+  npi                  String?
+  profInsurance        String?
+  gender               String?
+  faithOrientation     String?
+  languages            String[]
+  communities          String[]
+  clientConcerns       String[]
+  typesOfTherapy       String[]
+  services             String[]
+  ages                 String[]
+  groups               String[]
+  specialties          String[]   @default([])
+  expertise            String[]   @default([])
+  sexuality            String?
+  availabilityNote     String?
+  therapyTypes         String[]   @default([])
+  therapyApproachNote  String?
+  nearbyCities         String[]   @default([])
+  nearbyNeighborhoods  String[]   @default([])
+  locationNote         String?
+  profileComplete      Boolean    @default(false)
+  published            Boolean    @default(false)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  userId               String?    @unique
+  user                 User?      @relation(fields: [userId], references: [id])
+}

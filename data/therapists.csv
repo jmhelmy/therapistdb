@@ -1,0 +1,4 @@
+name,slug,city,state,languages,clientConcerns,typesOfTherapy
+Jane Doe,jane-doe,Los Angeles,CA,"English,Spanish","Anxiety,Depression","CBT,EMDR"
+John Smith,john-smith,San Diego,CA,"English","Grief,PTSD","Psychodynamic"
+Lisa Patel,lisa-patel,San Francisco,CA,"English,Hindi","ADHD,Trauma","DBT"
