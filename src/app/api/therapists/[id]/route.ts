@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-/* GET  /api/therapists/:id   → { name: "Tom Zhang" }  */
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
+  const { id } = context.params;
+
   const therapist = await prisma.therapist.findUnique({
-    where: { id: params.id },
+    where: { id },
     select: { name: true },
   });
 
-  // return {} if not found so the fetch still resolves
   return NextResponse.json(therapist ?? {});
 }
