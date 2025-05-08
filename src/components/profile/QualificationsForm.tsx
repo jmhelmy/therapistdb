@@ -8,7 +8,7 @@ interface QualificationsFormProps {
     primaryCredential: string
     licenseNumber: string
     licenseState: string
-    licenseExpirationMonth: string
+    licenseExpirationMonth: string // still string in form
     licenseExpirationYear: string
     schoolName: string
     degree: string
@@ -106,9 +106,23 @@ export default function QualificationsForm({ formData, handleChange }: Qualifica
             className="w-1/2 px-4 py-2 border rounded bg-[#f1f5f9]"
           >
             <option value="">- Select Month -</option>
-            {['January', 'February', 'March', 'April', 'May', 'June',
-              'July', 'August', 'September', 'October', 'November', 'December'].map((month, i) => (
-              <option key={i} value={month}>{month}</option>
+            {[
+              { label: 'January', value: '1' },
+              { label: 'February', value: '2' },
+              { label: 'March', value: '3' },
+              { label: 'April', value: '4' },
+              { label: 'May', value: '5' },
+              { label: 'June', value: '6' },
+              { label: 'July', value: '7' },
+              { label: 'August', value: '8' },
+              { label: 'September', value: '9' },
+              { label: 'October', value: '10' },
+              { label: 'November', value: '11' },
+              { label: 'December', value: '12' },
+            ].map(({ label, value }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
             ))}
           </select>
 
@@ -120,7 +134,9 @@ export default function QualificationsForm({ formData, handleChange }: Qualifica
           >
             <option value="">- Select Year -</option>
             {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() + i).map((year) => (
-              <option key={year} value={String(year)}>{year}</option>
+              <option key={year} value={String(year)}>
+                {year}
+              </option>
             ))}
           </select>
         </div>

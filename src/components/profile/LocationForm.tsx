@@ -4,17 +4,17 @@ import React from 'react'
 
 interface LocationFormProps {
   formData: {
-    primaryAddress: string
-    primaryCity: string
-    primaryState: string
-    primaryZip: string
-    additionalAddress: string
-    additionalCity: string
-    additionalState: string
-    additionalZip: string
+    primaryAddress: string | null
+    primaryCity: string | null
+    primaryState: string | null
+    primaryZip: string | null
+    additionalAddress: string | null
+    additionalCity: string | null
+    additionalState: string | null
+    additionalZip: string | null
     telehealth: boolean
     inPerson: boolean
-    locationDescription: string
+    locationDescription: string | null
   }
   handleChange: (e: React.ChangeEvent<any>) => void
 }
@@ -33,7 +33,7 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
         <input
           name="primaryAddress"
           placeholder="Address"
-          value={formData.primaryAddress}
+          value={formData.primaryAddress ?? ''}
           onChange={handleChange}
           className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         />
@@ -41,21 +41,21 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
           <input
             name="primaryCity"
             placeholder="City"
-            value={formData.primaryCity}
+            value={formData.primaryCity ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
           <input
             name="primaryState"
             placeholder="State"
-            value={formData.primaryState}
+            value={formData.primaryState ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
           <input
             name="primaryZip"
             placeholder="ZIP"
-            value={formData.primaryZip}
+            value={formData.primaryZip ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
@@ -68,7 +68,7 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
         <input
           name="additionalAddress"
           placeholder="Address"
-          value={formData.additionalAddress}
+          value={formData.additionalAddress ?? ''}
           onChange={handleChange}
           className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         />
@@ -76,21 +76,21 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
           <input
             name="additionalCity"
             placeholder="City"
-            value={formData.additionalCity}
+            value={formData.additionalCity ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
           <input
             name="additionalState"
             placeholder="State"
-            value={formData.additionalState}
+            value={formData.additionalState ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
           <input
             name="additionalZip"
             placeholder="ZIP"
-            value={formData.additionalZip}
+            value={formData.additionalZip ?? ''}
             onChange={handleChange}
             className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
           />
@@ -103,7 +103,7 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
           <input
             type="checkbox"
             name="telehealth"
-            checked={formData.telehealth}
+            checked={!!formData.telehealth}
             onChange={handleChange}
             className="form-checkbox"
           />
@@ -113,7 +113,7 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
           <input
             type="checkbox"
             name="inPerson"
-            checked={formData.inPerson}
+            checked={!!formData.inPerson}
             onChange={handleChange}
             className="form-checkbox"
           />
@@ -128,7 +128,7 @@ export default function LocationForm({ formData, handleChange }: LocationFormPro
         </label>
         <textarea
           name="locationDescription"
-          value={formData.locationDescription}
+          value={formData.locationDescription ?? ''}
           onChange={handleChange}
           rows={3}
           className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"

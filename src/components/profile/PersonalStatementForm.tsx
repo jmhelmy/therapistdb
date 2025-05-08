@@ -1,84 +1,87 @@
+// src/components/profile/PersonalStatementForm.tsx
 'use client'
 
 import React from 'react'
+import { Feather } from 'lucide-react' // or import a feather icon of your choice
 
-interface Props {
-  formData: any
+interface PersonalStatementFormProps {
+  formData: {
+    tagline: string | null
+    personalStatement1: string | null
+    personalStatement2: string | null
+    personalStatement3: string | null
+  }
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
 }
 
-export default function SpecialtiesForm({ formData, handleChange }: Props) {
+export default function PersonalStatementForm({
+  formData,
+  handleChange,
+}: PersonalStatementFormProps) {
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Specialties and Client Focus</h2>
-
-      {/* Issues */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Issues</label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {['Alcoholism', 'Anxiety', 'Depression'].map((issue) => (
-            <label key={issue} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="clientConcerns"
-                value={issue}
-                checked={formData.clientConcerns.includes(issue)}
-                onChange={handleChange}
-              />
-              <span>{issue}</span>
-            </label>
-          ))}
-        </div>
+    <div className="bg-white shadow-sm rounded-lg p-8 max-w-2xl mx-auto space-y-8">
+      <div className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
+        <Feather className="w-5 h-5" />
+        <h2>Personal Statement</h2>
       </div>
 
-      {/* Description */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700">Describe your specialty and client focus</label>
-        <textarea
-          name="description"
-          value={formData.description}
+      {/* Tagline */}
+      <div>
+        <label className="block text-sm font-bold text-gray-800 mb-1">
+          Tagline for service
+        </label>
+        <input
+          name="tagline"
+          value={formData.tagline ?? ''}
           onChange={handleChange}
-          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-          rows={4}
+          placeholder="e.g. Grounded, compassionate therapy for individuals..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
         />
       </div>
 
-      {/* Ages */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Ages</label>
-        <div className="flex flex-wrap gap-2">
-          {['Children', 'Teens', 'Adults', 'Elders (65+)'].map((age) => (
-            <label key={age} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="ages"
-                value={age}
-                checked={formData.ages.includes(age)}
-                onChange={handleChange}
-              />
-              <span>{age}</span>
-            </label>
-          ))}
-        </div>
+      {/* Paragraph 1 */}
+      <div>
+        <label className="block text-sm font-bold text-gray-800 mb-1">
+          Personal statement – Part 1
+        </label>
+        <textarea
+          name="personalStatement1"
+          value={formData.personalStatement1 ?? ''}
+          onChange={handleChange}
+          rows={5}
+          placeholder="Tell your story. E.g. I’m Dr. Rivera, a licensed psychologist..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+        />
       </div>
 
-      {/* Languages */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Languages</label>
-        <div className="flex gap-4">
-          {['English', 'Spanish'].map((lang) => (
-            <label key={lang} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="languages"
-                value={lang}
-                checked={formData.languages.includes(lang)}
-                onChange={handleChange}
-              />
-              <span>{lang}</span>
-            </label>
-          ))}
-        </div>
+      {/* Paragraph 2 */}
+      <div>
+        <label className="block text-sm font-bold text-gray-800 mb-1">
+          Personal statement – Part 2
+        </label>
+        <textarea
+          name="personalStatement2"
+          value={formData.personalStatement2 ?? ''}
+          onChange={handleChange}
+          rows={5}
+          placeholder="What issues do you specialize in? E.g. I work with anxiety, depression..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+        />
+      </div>
+
+      {/* Paragraph 3 */}
+      <div>
+        <label className="block text-sm font-bold text-gray-800 mb-1">
+          Personal statement – Part 3
+        </label>
+        <textarea
+          name="personalStatement3"
+          value={formData.personalStatement3 ?? ''}
+          onChange={handleChange}
+          rows={5}
+          placeholder="How do you work? E.g. My approach is collaborative, strengths-based..."
+          className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+        />
       </div>
     </div>
   )

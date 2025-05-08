@@ -1,72 +1,59 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 
 interface FinancesFormProps {
   formData: {
-    id?: string
-    fees: string
-    couplesFee?: string
-    slidingScale?: boolean
-    freeConsultation?: boolean
-    billing: string
-    paymentMethods: string
-    insurance: string
+    feeIndividual: string
+    feeCouples: string
+    slidingScale: boolean
+    freeConsultation: boolean
+    feeComment: string
+    paymentMethods: string[]
+    insuranceAccepted: string
   }
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void
+  handleChange: (e: React.ChangeEvent<any>) => void
+  handleArrayToggle: (field: 'paymentMethods', value: string) => void
 }
 
-export default function FinancesForm({ formData, handleChange }: FinancesFormProps) {
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null)
+const paymentOptions = ['Zelle', 'Venmo', 'Credit Card', 'Cash', 'PayPal']
 
-  const autoSave = async () => {
-    if (!formData.id) return
-    try {
-      await fetch('/api/therapists', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-    } catch (err) {
-      console.error('Auto-save failed:', err)
-    }
-  }
-
-  const handleAndSave = (e: React.ChangeEvent<any>) => {
-    handleChange(e)
-    if (timeoutId) clearTimeout(timeoutId)
-    const newTimeout = setTimeout(autoSave, 1000)
-    setTimeoutId(newTimeout)
-  }
-
+export default function FinancesForm({
+  formData,
+  handleChange,
+  handleArrayToggle,
+}: FinancesFormProps) {
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-gray-800">💳 Finances</h2>
+    <div className="bg-white shadow-sm rounded-lg p-8 max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
+        <span>💰</span>
+        <h2>Finances</h2>
+      </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-1">Individual therapy fee</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Individual therapy fee</label>
         <input
+          name="feeIndividual"
           type="text"
-          name="fees"
-          value={formData.fees}
-          onChange={handleAndSave}
-          className="w-full px-4 py-2 border rounded bg-[#f1f5f9]"
           placeholder="$"
+          value={formData.feeIndividual || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-1">Couples therapy fee</label>
-        <p className="text-sm text-gray-500 mb-1">
-          If couples therapy isn’t offered, or is the same as individual therapy, leave blank
+        <label className="block text-sm font-medium text-gray-700 mb-1">Couples therapy fee</label>
+        <p className="text-xs text-gray-500 mb-1">
+          Leave blank if not offered or same as individual therapy.
         </p>
         <input
+          name="feeCouples"
           type="text"
-          name="couplesFee"
-          value={formData.couplesFee || ''}
-          onChange={handleAndSave}
-          className="w-full px-4 py-2 border rounded bg-[#f1f5f9]"
           placeholder="$"
+          value={formData.feeCouples || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         />
       </div>
 
@@ -74,78 +61,70 @@ export default function FinancesForm({ formData, handleChange }: FinancesFormPro
         <input
           type="checkbox"
           name="slidingScale"
-          checked={formData.slidingScale || false}
-          onChange={(e) =>
-            handleAndSave({
-              target: {
-                name: 'slidingScale',
-                value: String(e.target.checked),
-              },
-            } as any)
-          }
+          checked={formData.slidingScale}
+          onChange={handleChange}
+          className="form-checkbox h-5 w-5 text-teal-600"
         />
-        <label className="text-sm">Yes, I offer sliding scale for those who need it</label>
+        <label className="text-sm text-gray-700">I offer sliding scale for those who need it</label>
       </div>
 
       <div className="flex items-center space-x-2">
         <input
           type="checkbox"
           name="freeConsultation"
-          checked={formData.freeConsultation || false}
-          onChange={(e) =>
-            handleAndSave({
-              target: {
-                name: 'freeConsultation',
-                value: String(e.target.checked),
-              },
-            } as any)
-          }
+          checked={formData.freeConsultation}
+          onChange={handleChange}
+          className="form-checkbox h-5 w-5 text-teal-600"
         />
-        <label className="text-sm">
-          Yes, I offer a free 15-minute consultation to also see if it’s a good fit
-        </label>
+        <label className="text-sm text-gray-700">I offer a free 15-minute consultation</label>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-1">Your comment on fees and insurance</label>
-        <p className="text-sm text-gray-500 mb-1">
-          In your own words, describe the fees and insurance or add additional context
-        </p>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Your comment on fees</label>
         <textarea
-          name="billing"
-          value={formData.billing}
-          onChange={handleAndSave}
-          className="w-full px-4 py-2 border rounded bg-[#f1f5f9]"
+          name="feeComment"
+          value={formData.feeComment || ''}
+          onChange={handleChange}
+          placeholder="e.g. I offer lower rates for students or early-career professionals."
           rows={3}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         />
       </div>
 
+      {/* Payment Methods */}
       <div>
-        <label className="block text-sm font-semibold mb-1">Payment methods</label>
-        <p className="text-sm text-gray-500 mb-1">e.g. Zelle, Venmo, Credit Card</p>
-        <textarea
-          name="paymentMethods"
-          value={formData.paymentMethods}
-          onChange={handleAndSave}
-          className="w-full px-4 py-2 border rounded bg-[#f1f5f9]"
-          rows={2}
-        />
+        <label className="block text-sm font-medium text-gray-700 mb-1">Payment methods</label>
+        <div className="flex flex-wrap gap-3">
+          {paymentOptions.map((option) => (
+            <label key={option} className="flex items-center space-x-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                name="paymentMethods"
+                checked={formData.paymentMethods.includes(option)}
+                onChange={() => handleArrayToggle('paymentMethods', option)}
+                className="form-checkbox text-teal-600"
+              />
+              <span>{option}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
+      {/* Insurance */}
       <div>
-        <label className="block text-sm font-semibold mb-1">Insurance</label>
-        <p className="text-sm text-gray-500 mb-1">Select any insurance that you accept</p>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Insurance accepted</label>
         <select
-          name="insurance"
-          value={formData.insurance}
-          onChange={handleAndSave}
-          className="w-full px-4 py-2 border rounded bg-[#f1f5f9]"
+          name="insuranceAccepted"
+          value={formData.insuranceAccepted || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
         >
           <option value="">- Select insurance -</option>
           <option value="Aetna">Aetna</option>
           <option value="Cigna">Cigna</option>
           <option value="Blue Cross">Blue Cross</option>
           <option value="UnitedHealthcare">UnitedHealthcare</option>
+          <option value="Kaiser">Kaiser</option>
         </select>
       </div>
     </div>

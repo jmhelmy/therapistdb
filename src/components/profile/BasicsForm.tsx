@@ -1,4 +1,3 @@
-// src/components/profile/BasicsForm.tsx
 'use client'
 
 import React from 'react'
@@ -27,29 +26,44 @@ export default function BasicsForm({
   return (
     <div className="bg-white shadow-sm rounded-lg p-8 space-y-8 max-w-2xl mx-auto">
 
+      {/* Section header */}
       <div className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
         <span>🧾</span>
         <h2>Basics</h2>
       </div>
 
-      {/* Profile Photo */}
+      {/* Profile Photo Upload Box */}
       <div className="w-full flex justify-center">
         <label
           htmlFor="profile-photo"
-          className="w-36 h-36 bg-gray-100 border border-dashed border-gray-400 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition"
+          className="relative w-36 h-36 bg-gray-100 border border-dashed border-gray-400 rounded-md flex items-center justify-center cursor-pointer hover:bg-gray-200 transition overflow-hidden"
         >
-          <Camera className="w-6 h-6 text-gray-500" />
-          <span className="text-xs text-gray-600 mt-1">Profile photo</span>
+          {formData.imageUrl
+            ? (
+              <img
+                src={formData.imageUrl}
+                alt="Profile"
+                className="object-cover w-full h-full"
+              />
+            )
+            : (
+              <div className="flex flex-col items-center">
+                <Camera className="w-6 h-6 text-gray-500" />
+                <span className="text-xs text-gray-600 mt-1">Profile photo</span>
+              </div>
+            )
+          }
           <input
             id="profile-photo"
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            className="hidden"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </label>
       </div>
 
+      {/* Form Fields */}
       <div className="space-y-6">
         {/* Full Name */}
         <div>
@@ -76,14 +90,14 @@ export default function BasicsForm({
               name="primaryCredential"
               value={formData.primaryCredential}
               onChange={handleChange}
-              placeholder=""
+              placeholder="LMFT"
               className="w-1/2 px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
             />
             <input
               name="primaryCredentialAlt"
               value={formData.primaryCredentialAlt}
               onChange={handleChange}
-              placeholder=""
+              placeholder="Psychotherapist"
               className="w-1/2 px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
             />
           </div>
@@ -99,11 +113,12 @@ export default function BasicsForm({
             name="phone"
             value={formData.phone}
             onChange={handleChange}
+            placeholder="e.g. (555) 123-4567"
             className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
 
-        {/* Email (workEmail) */}
+        {/* Email */}
         <div>
           <label className="block text-sm font-bold text-gray-800 mb-1">
             Email – Premium users only
@@ -111,8 +126,10 @@ export default function BasicsForm({
           <p className="text-sm text-gray-500 mb-2">For clients to email</p>
           <input
             name="workEmail"
+            type="email"
             value={formData.workEmail}
             onChange={handleChange}
+            placeholder="e.g. emily@youremail.com"
             className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>
@@ -122,13 +139,13 @@ export default function BasicsForm({
           <label className="block text-sm font-bold text-gray-800 mb-1">
             Website
           </label>
-          <p className="text-sm text-gray-500 mb-2">
-            e.g. https://your-site.com
-          </p>
+          <p className="text-sm text-gray-500 mb-2">e.g. https://yourpractice.com</p>
           <input
             name="website"
+            type="url"
             value={formData.website}
             onChange={handleChange}
+            placeholder="e.g. https://yourpractice.com"
             className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
           />
         </div>

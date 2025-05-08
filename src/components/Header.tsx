@@ -37,7 +37,7 @@ export default function Header() {
         {/* Left: Logo + Nav */}
         <div className="flex items-center space-x-12">
           <Link href="/" className="flex items-center space-x-2">
-            <Image src="/favicon.ico" alt="therapistdb logo" width={24} height={24} />
+            <Image src="/logotherapistdb.png" alt="therapistdb logo" width={24} height={24} />
             <span className="text-[20px] text-[#1a2d3e] font-bold">therapistdb</span>
           </Link>
 

@@ -23,6 +23,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={montserrat.variable}>
+      {/* This <head /> is required to pick up app/head.tsx */}
+      <head />
       <body className="font-sans bg-[#F9FAF9] text-[#181818] antialiased">
         <Providers>
           <Header />

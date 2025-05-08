@@ -1,16 +1,16 @@
+// src/app/build-profile/page.tsx
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-import BasicsForm from '@/components/profile/BasicsForm'
-import LocationForm from '@/components/profile/LocationForm'
-import FinancesForm from '@/components/profile/FinancesForm'
-import QualificationsForm from '@/components/profile/QualificationsForm'
-import PersonalStatementForm from '@/components/profile/PersonalStatementForm'
-import SpecialtiesForm from '@/components/profile/SpecialtiesForm'
-import TreatmentStyleForm from '@/components/profile/TreatmentStyleForm'
+import BasicsForm             from '@/components/profile/BasicsForm'
+import LocationForm           from '@/components/profile/LocationForm'
+import FinancesForm           from '@/components/profile/FinancesForm'
+import QualificationsForm     from '@/components/profile/QualificationsForm'
+import PersonalStatementForm  from '@/components/profile/PersonalStatementForm'
+import SpecialtiesForm        from '@/components/profile/SpecialtiesForm'
+import TreatmentStyleForm     from '@/components/profile/TreatmentStyleForm'
 
 interface FormData {
   id: string
@@ -85,6 +85,79 @@ interface FormData {
   treatmentStyleDescription: string
 }
 
+const defaultData: FormData = {
+  id: '',
+  slug: '',
+  imageUrl: '',
+  published: false,
+
+  name: '',
+  primaryCredential: '',
+  primaryCredentialAlt: '',
+  gender: '',
+  phone: '',
+  workEmail: '',
+  website: '',
+
+  primaryAddress: '',
+  primaryCity: '',
+  primaryState: '',
+  primaryZip: '',
+  additionalAddress: '',
+  additionalCity: '',
+  additionalState: '',
+  additionalZip: '',
+  telehealth: false,
+  inPerson: false,
+  locationDescription: '',
+
+  seoZip1: '',
+  seoZip2: '',
+  seoZip3: '',
+  nearbyCity1: '',
+  nearbyCity2: '',
+  nearbyCity3: '',
+
+  feeIndividual: '',
+  feeCouples: '',
+  slidingScale: false,
+  freeConsultation: false,
+  feeComment: '',
+  paymentMethods: [],
+  insuranceAccepted: '',
+
+  licenseStatus: '',
+  profession: '',
+  licenseNumber: '',
+  licenseState: '',
+  licenseExpirationMonth: 0,
+  licenseExpirationYear: 0,
+
+  educationSchool: '',
+  educationDegree: '',
+  educationYearGraduated: 0,
+  practiceStartYear: 0,
+
+  tagline: '',
+
+  personalStatement1: '',
+  personalStatement2: '',
+  personalStatement3: '',
+
+  issues: [],
+  specialtyDescription: '',
+  mentalHealthRoles: [],
+  sexuality: '',
+  ages: [],
+  participants: [],
+  communities: [],
+  languages: [],
+  topIssues: [],
+
+  treatmentStyle: [],
+  treatmentStyleDescription: '',
+}
+
 export default function BuildProfilePage() {
   const { status } = useSession()
   const router = useRouter()
@@ -99,113 +172,29 @@ export default function BuildProfilePage() {
     'Treatment Style',
     'Preview',
   ]
-  const [step, setStep] = useState(1)
+  const [step, setStep]               = useState(1)
+  const [formData, setFormData]       = useState<FormData>(defaultData)
+  const [isSaving, setIsSaving]       = useState(false)
+  const [saveError, setSaveError]     = useState<string|null>(null)
 
-  const [formData, setFormData] = useState<FormData>({
-    id: '',
-    slug: '',
-    imageUrl: '',
-    published: false,
-
-    name: '',
-    primaryCredential: '',
-    primaryCredentialAlt: '',
-    gender: '',
-    phone: '',
-    workEmail: '',
-    website: '',
-
-    primaryAddress: '',
-    primaryCity: '',
-    primaryState: '',
-    primaryZip: '',
-    additionalAddress: '',
-    additionalCity: '',
-    additionalState: '',
-    additionalZip: '',
-    telehealth: false,
-    inPerson: false,
-    locationDescription: '',
-
-    seoZip1: '',
-    seoZip2: '',
-    seoZip3: '',
-    nearbyCity1: '',
-    nearbyCity2: '',
-    nearbyCity3: '',
-
-    feeIndividual: '',
-    feeCouples: '',
-    slidingScale: false,
-    freeConsultation: false,
-    feeComment: '',
-    paymentMethods: [],
-    insuranceAccepted: '',
-
-    licenseStatus: '',
-    profession: '',
-    licenseNumber: '',
-    licenseState: '',
-    licenseExpirationMonth: 0,
-    licenseExpirationYear: 0,
-
-    educationSchool: '',
-    educationDegree: '',
-    educationYearGraduated: 0,
-    practiceStartYear: 0,
-
-    tagline: '',
-
-    personalStatement1: '',
-    personalStatement2: '',
-    personalStatement3: '',
-
-    issues: [],
-    specialtyDescription: '',
-    mentalHealthRoles: [],
-    sexuality: '',
-    ages: [],
-    participants: [],
-    communities: [],
-    languages: [],
-    topIssues: [],
-
-    treatmentStyle: [],
-    treatmentStyleDescription: '',
-  })
-
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  // Redirect if not signed in
+  // redirect if unauthenticated
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login')
   }, [status, router])
 
-  if (status === 'loading' || status === 'unauthenticated') {
-    return <div className="p-8 text-center">Loading…</div>
-  }
-
-  // Load existing or seeded profile
+  // load current profile
   useEffect(() => {
     fetch('/api/therapists/me')
-      .then(async r => {
-        if (r.status === 204) return null
-        if (!r.ok) {
-          console.error('Load failed:', r.status, await r.text())
-          return null
-        }
-        const txt = await r.text()
-        try {
-          return txt ? JSON.parse(txt) : null
-        } catch {
-          console.error('JSON parse error on /api/therapists/me:', txt)
-          return null
-        }
+      .then(async res => {
+        if (res.status === 204) return null
+        if (!res.ok) throw new Error(await res.text())
+        const txt = await res.text()
+        return txt ? JSON.parse(txt) as FormData : null
       })
-      .then((d: FormData | null) => {
+      .then(d => {
         if (d?.id) {
           setFormData({
+            ...defaultData,
             ...d,
             licenseExpirationMonth: d.licenseExpirationMonth ?? 0,
             licenseExpirationYear: d.licenseExpirationYear ?? 0,
@@ -214,16 +203,16 @@ export default function BuildProfilePage() {
           })
         }
       })
-      .catch(err => console.error('Unexpected load error:', err))
-  }, [router])
+      .catch(console.error)
+  }, [])
 
-  // Save helper: POST if new, PUT otherwise
+  // create or update therapist
   const saveToServer = useCallback(async (data: FormData) => {
     setIsSaving(true)
     setSaveError(null)
     try {
       const method = data.id ? 'PUT' : 'POST'
-      const res = await fetch('/api/therapists', {
+      const res    = await fetch('/api/therapists', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -231,8 +220,8 @@ export default function BuildProfilePage() {
       const txt = await res.text()
       if (!res.ok) throw new Error(txt || 'Save failed')
       if (!data.id) {
-        const obj = JSON.parse(txt)
-        setFormData(f => ({ ...f, id: obj.id }))
+        const json = JSON.parse(txt)
+        setFormData(f => ({ ...f, id: json.id }))
       }
     } catch (err: any) {
       setSaveError(err.message)
@@ -241,7 +230,7 @@ export default function BuildProfilePage() {
     }
   }, [])
 
-  // Handlers
+  // generic onChange handler
   const handleChange = useCallback((e: React.ChangeEvent<any>) => {
     const { name, value, type, checked } = e.target
     setFormData(f => ({
@@ -250,6 +239,7 @@ export default function BuildProfilePage() {
     }))
   }, [])
 
+  // toggles for checkbox-arrays
   const handleArrayToggle = useCallback((field: keyof FormData, value: string) => {
     setFormData(f => {
       const arr = f[field] as string[]
@@ -262,6 +252,7 @@ export default function BuildProfilePage() {
     })
   }, [])
 
+  // image upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !formData.id) return
@@ -271,32 +262,38 @@ export default function BuildProfilePage() {
       method: 'POST',
       body: fd,
     })
-    const txt = await res.text()
-    if (res.ok && txt) {
-      const { url } = JSON.parse(txt)
-      setFormData(f => ({ ...f, imageUrl: url }))
+    const json = await res.json()
+    if (res.ok && json.url) {
+      setFormData(f => ({ ...f, imageUrl: json.url }))
     }
   }
 
-  // Publish
+  // publish endpoint
   const doPublish = async () => {
     await saveToServer(formData)
     const res = await fetch('/api/therapists/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: formData.id }),
+      body: JSON.stringify({ id: formData.id, name: formData.name }),
     })
-    const txt = await res.text()
-    if (!res.ok) alert(`Publish failed: ${txt}`)
-    else setFormData(f => ({ ...f, published: true }))
+    const j = await res.json()
+    if (!res.ok || !j.success) {
+      alert(`Publish failed: ${j.message}`)
+    } else {
+      setFormData(f => ({ ...f, published: true }))
+    }
   }
 
-  // Wizard nav
+  // next / back
   const next = async () => {
     await saveToServer(formData)
-    setStep(s => Math.min(tabs.length, s + 1))
+    setStep(n => Math.min(tabs.length, n + 1))
   }
-  const back = () => setStep(s => Math.max(1, s - 1))
+  const back = () => setStep(n => Math.max(1, n - 1))
+
+  if (status === 'loading') {
+    return <div className="p-8 text-center">Loading…</div>
+  }
 
   return (
     <div className="min-h-screen bg-[#fafbfa] py-10 px-6">
@@ -317,54 +314,74 @@ export default function BuildProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-2 p-4 border-b">
-          {tabs.map((label, i) => (
+        <div className="flex space-x-2 p-4 border-b overflow-x-auto">
+          {tabs.map((lbl,i) => (
             <button
               key={i}
-              onClick={() => setStep(i + 1)}
+              onClick={()=>setStep(i+1)}
               disabled={isSaving}
-              className={`px-3 py-1 rounded-full text-sm transition ${
-                step === i + 1
+              className={`px-3 py-1 rounded-full text-sm ${
+                step===i+1
                   ? 'bg-teal-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {label}
+              {lbl}
             </button>
           ))}
         </div>
 
-        {/* Content */}
+        {/* Body */}
         <div className="p-6 space-y-4">
           {isSaving && <div className="text-gray-500">Saving…</div>}
           {saveError && <div className="text-red-600">Error: {saveError}</div>}
 
-          {step === 1 && (
+          {step===1 && (
             <BasicsForm
               formData={formData}
               handleChange={handleChange}
               handleImageUpload={handleImageUpload}
             />
           )}
-          {step === 2 && <LocationForm formData={formData} handleChange={handleChange} />}
-          {step === 3 && <FinancesForm formData={formData} handleChange={handleChange} />}
-          {step === 4 && <QualificationsForm formData={formData} handleChange={handleChange} />}
-          {step === 5 && <PersonalStatementForm formData={formData} handleChange={handleChange} />}
-          {step === 6 && (
+          {step===2 && (
+            <LocationForm
+              formData={formData}
+              handleChange={handleChange}
+            />
+          )}
+          {step===3 && (
+            <FinancesForm
+              formData={formData}
+              handleChange={handleChange}
+            />
+          )}
+          {step===4 && (
+            <QualificationsForm
+              formData={formData}
+              handleChange={handleChange}
+            />
+          )}
+          {step===5 && (
+            <PersonalStatementForm
+              formData={formData}
+              handleChange={handleChange}
+            />
+          )}
+          {step===6 && (
             <SpecialtiesForm
               formData={formData}
               handleChange={handleChange}
               handleCheckboxChange={v => handleArrayToggle('issues', v)}
             />
           )}
-          {step === 7 && (
+          {step===7 && (
             <TreatmentStyleForm
               formData={formData}
               handleChange={handleChange}
               handleCheckboxChange={v => handleArrayToggle('treatmentStyle', v)}
             />
           )}
-          {step === 8 && (
+          {step===8 && (
             <div>
               <h3 className="text-xl font-bold">Preview JSON</h3>
               <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
@@ -376,14 +393,11 @@ export default function BuildProfilePage() {
 
         {/* Footer */}
         <div className="flex justify-between border-t p-4 bg-white">
-          {step > 1 ? (
-            <button onClick={back} className="px-4 py-2 border rounded">
-              Back
-            </button>
-          ) : (
-            <div />
-          )}
-          {step < tabs.length && (
+          {step>1
+            ? <button onClick={back} className="px-4 py-2 border rounded">Back</button>
+            : <div/>
+          }
+          {step<tabs.length && (
             <button
               onClick={next}
               disabled={isSaving}
@@ -393,6 +407,7 @@ export default function BuildProfilePage() {
             </button>
           )}
         </div>
+
       </div>
     </div>
   )
