@@ -5,9 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
-/* 1. Dynamic <head> metadata */
+const PAGE_SIZE = 10
+
 export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
-  const zip = searchParams.zip
+  const zip = typeof searchParams.zip === 'string' ? searchParams.zip : undefined
   return {
     title: zip
       ? `Therapists near ${zip} | TherapistDB`
@@ -18,105 +19,166 @@ export async function generateMetadata({ searchParams }: any): Promise<Metadata>
   }
 }
 
-/* 2. Page component (server) */
 export default async function TherapistsPage({ searchParams }: any) {
   const zip = typeof searchParams.zip === 'string' ? searchParams.zip : undefined
+  const page = parseInt((searchParams.page as string) || '1', 10)
 
-  const where = {
-    published: true,
-    slug:      { not: '' },
-    ...(zip && { zipCode: zip }),
-  } as const
+  // Build your Prisma filter
+  const where: any = { published: true }
+  if (zip) {
+    // change this to whichever field you index for zip:
+    where.seoZip1 = zip
+  }
 
+  const total = await prisma.therapist.count({ where })
+  const totalPages = Math.ceil(total / PAGE_SIZE)
   const therapists = await prisma.therapist.findMany({
     where,
     orderBy: { name: 'asc' },
-    take: 50,
+    skip: (page - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   })
 
   return (
     <main className="bg-[#F9FAF9] min-h-screen px-4 py-12 font-sans">
-      <div className="max-w-6xl mx-auto">
-        {/* Page title */}
-        <h1 className="text-3xl font-semibold mb-6 text-center text-gray-800">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Page Title */}
+        <h1 className="text-3xl font-semibold text-gray-800 text-center">
           {zip ? `Therapists near ${zip}` : 'Find a Mental Health Professional'}
         </h1>
 
-        {/* 3. Client-side filters */}
+        {/* Only this search/filter bar */}
         <ClientFilters />
 
-        {/* 4. Therapist listings or empty state */}
-        <section aria-labelledby="therapist-list-heading" className="mt-8">
-          <h2 id="therapist-list-heading" className="sr-only">
-            {therapists.length
-              ? `Listing of therapists${zip ? ` near ${zip}` : ''}`
-              : 'No therapists found'}
-          </h2>
+        {/* Results Count */}
+        <div className="text-gray-600">
+          {total.toLocaleString()} Results
+        </div>
 
-          {therapists.length === 0 ? (
-            <p className="text-center text-gray-500">
-              {zip
-                ? `No published therapists found for zip code “${zip}”.`
-                : 'No published therapists available at the moment.'}
-            </p>
-          ) : (
-            <ul className="space-y-6">
-              {therapists.map((t) => (
-                <li key={t.id}>
-                  <Link
-                    href={`/therapists/${t.slug}`}
-                    className="block hover:shadow-md transition-shadow duration-200 rounded-xl"
-                  >
-                    <div className="bg-white rounded-xl shadow-md p-6 flex gap-5 items-start border border-gray-100">
-                      {/* Avatar */}
-                      <div className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden border border-gray-300">
-                        <Image
-                          src={t.imageUrl ?? '/default-avatar.png'}
-                          alt={`${t.name ?? 'Therapist'} avatar`}
-                          width={64}
-                          height={64}
-                          className="object-cover w-full h-full"
-                          loading="lazy"
-                        />
-                      </div>
+        {/* Therapist Cards */}
+        <ul className="space-y-6">
+          {therapists.map((t) => (
+            <li key={t.id}>
+              <Link
+                href={`/therapists/${t.slug}`}
+                className="block hover:shadow-md transition-shadow duration-200 rounded-xl"
+              >
+                <div className="bg-white rounded-xl shadow-md p-6 flex gap-5 items-start border border-gray-100">
+                  {/* Avatar */}
+                  <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-300 flex-shrink-0">
+                    <Image
+                      src={t.imageUrl || '/default-avatar.png'}
+                      alt={`${t.name} avatar`}
+                      width={64}
+                      height={64}
+                      className="object-cover w-full h-full"
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {t.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {t.primaryCredential}
+                      {t.primaryCredentialAlt && `, ${t.primaryCredentialAlt}`}
+                    </p>
+                    {t.tagline && (
+                      <p className="text-sm text-gray-800 mb-2">{t.tagline}</p>
+                    )}
 
-                      {/* Info */}
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-[#181818]">
-                          {t.name ?? 'Unnamed Therapist'}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-1">
-                          {(t.professions as string) ?? 'N/A'} —{' '}
-                          {t.city ?? 'Unknown City'}, {t.state ?? 'Unknown State'}
-                        </p>
-                        <p className="text-sm text-gray-800 mb-2 leading-relaxed">
-                          {t.description ?? ''}
-                        </p>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          <p>
-                            <strong>Billing:</strong> {t.billing ?? 'N/A'}
-                          </p>
-                          <p>
-                            <strong>Languages:</strong>{' '}
-                            {Array.isArray(t.languages) && t.languages.length
-                              ? t.languages.join(', ')
-                              : 'N/A'}
-                          </p>
-                          <p>
-                            <strong>Concerns:</strong>{' '}
-                            {Array.isArray(t.clientConcerns) && t.clientConcerns.length
-                              ? t.clientConcerns.join(', ')
-                              : 'N/A'}
-                          </p>
-                        </div>
-                      </div>
+                    <div className="text-sm text-gray-700 space-y-1 mb-2">
+                      <p>
+                        <strong>Individual Fee:</strong>{' '}
+                        {t.feeIndividual || 'N/A'}
+                      </p>
+                      <p>
+                        <strong>Couples Fee:</strong>{' '}
+                        {t.feeCouples || 'N/A'}
+                      </p>
+                      {t.slidingScale && (
+                        <p className="text-green-700">✅ Sliding Scale</p>
+                      )}
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+
+                    <div className="text-sm text-gray-700 space-y-1 mb-2">
+                      <p>
+                        <strong>Payment Methods:</strong>{' '}
+                        {t.paymentMethods.length
+                          ? t.paymentMethods.join(', ')
+                          : 'N/A'}
+                      </p>
+                      <p>
+                        <strong>Insurance:</strong>{' '}
+                        {t.insuranceAccepted || 'N/A'}
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-gray-600 mb-2">
+                      <strong>Location:</strong>{' '}
+                      {t.primaryCity || '—'},{' '}
+                      {t.primaryState || '—'} {t.primaryZip || ''}
+                    </p>
+
+                    <div className="text-sm text-gray-700 space-y-1">
+                      <p>
+                        <strong>Languages:</strong>{' '}
+                        {t.languages.length
+                          ? t.languages.join(', ')
+                          : 'N/A'}
+                      </p>
+                      <p>
+                        <strong>Issues:</strong>{' '}
+                        {t.issues.length ? t.issues.join(', ') : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        {/* Pagination */}
+        <nav
+          className="flex items-center justify-center space-x-2"
+          aria-label="Pagination"
+        >
+          <Link
+            href={`?zip=${zip || ''}&page=${page - 1}`}
+            className={`p-2 rounded ${
+              page === 1
+                ? 'text-gray-400 pointer-events-none'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            ←
+          </Link>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <Link
+              key={i + 1}
+              href={`?zip=${zip || ''}&page=${i + 1}`}
+              className={`px-3 py-1 rounded ${
+                page === i + 1
+                  ? 'bg-teal-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {i + 1}
+            </Link>
+          ))}
+          <Link
+            href={`?zip=${zip || ''}&page=${page + 1}`}
+            className={`p-2 rounded ${
+              page === totalPages
+                ? 'text-gray-400 pointer-events-none'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            →
+          </Link>
+        </nav>
       </div>
     </main>
   )

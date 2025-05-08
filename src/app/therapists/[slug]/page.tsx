@@ -4,8 +4,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
-export default async function TherapistProfilePage({ params }: any) {
-  const slug = String(params.slug)
+export default async function TherapistProfilePage({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  const slug = decodeURIComponent(params.slug)
 
   const therapist = await prisma.therapist.findUnique({
     where: { slug },
@@ -13,62 +17,64 @@ export default async function TherapistProfilePage({ params }: any) {
       id: true,
       userId: true,
       name: true,
-      title: true,
-      city: true,
-      state: true,
-      description: true,
+      tagline: true,
       imageUrl: true,
-      billing: true,
-      languages: true,
-      clientConcerns: true,
-      groups: true,
-      professions: true,
+      phone: true,
+      workEmail: true,
+      website: true,
+      primaryCredential: true,
+      primaryCredentialAlt: true,
       licenseStatus: true,
       licenseNumber: true,
       licenseState: true,
-      licenseExpiration: true,
-      primaryCredential: true,
-      credentials: true,
-      mentalHealthRole: true,
-      phone: true,
-      primaryOffice: true,
-      additionalOffice: true,
-      telephone: true,
-      fees: true,
+      licenseExpirationMonth: true,
+      licenseExpirationYear: true,
+      educationSchool: true,
+      educationDegree: true,
+      educationYearGraduated: true,
+      practiceStartYear: true,
+      feeIndividual: true,
+      feeCouples: true,
+      slidingScale: true,
+      freeConsultation: true,
       paymentMethods: true,
-      insurance: true,
-      npi: true,
-      profInsurance: true,
-      gender: true,
-      faithOrientation: true,
-      specialties: true,
-      expertise: true,
+      insuranceAccepted: true,
+      feeComment: true,
+      languages: true,
+      issues: true,
       sexuality: true,
-      availabilityNote: true,
-      therapyTypes: true,
-      therapyApproachNote: true,
-      nearbyCities: true,
-      nearbyNeighborhoods: true,
-      locationNote: true,
-      education: true,
-      yearsInPractice: true,
+      treatmentStyle: true,
+      treatmentStyleDescription: true,
+      locationDescription: true,
+      nearbyCity1: true,
+      nearbyCity2: true,
+      nearbyCity3: true,
+      primaryCity: true,
+      primaryState: true,
+      primaryZip: true,
+      specialtyDescription: true,
+      published: true,
     },
   })
 
-  if (!therapist) notFound()
+  if (!therapist || !therapist.published) notFound()
+
+  const nearby = [therapist.nearbyCity1, therapist.nearbyCity2, therapist.nearbyCity3]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <div className="bg-[#F9FAF9] min-h-screen px-4 py-10">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-600">
-          {therapist.state ?? 'Unknown State'} &gt; {therapist.city ?? 'Unknown City'} &gt; {therapist.name}
+        <nav className="text-sm text-gray-600 mb-2">
+          California &gt; {therapist.primaryCity || 'City'} &gt; {therapist.name}
         </nav>
 
-        {/* Claim CTA */}
+        {/* Claim notice */}
         {!therapist.userId && (
           <div className="bg-[#e6dbf9] border border-[#c9b8ec] text-sm text-gray-700 p-4 rounded-md">
-            This profile for <strong>{therapist.name}</strong> was pulled from public data. If it’s yours you can{' '}
+            This profile was auto-generated from public data. If it’s yours, you can{' '}
             <Link href={`/claim/${therapist.id}`} className="underline text-purple-800">
               claim or edit it here
             </Link>.
@@ -101,63 +107,87 @@ export default async function TherapistProfilePage({ params }: any) {
           </div>
           <div className="pb-6 px-4 mt-2">
             <h1 className="text-xl font-semibold text-gray-900">{therapist.name}</h1>
-            <p className="text-sm text-gray-500">{therapist.title}</p>
-            {therapist.description && (
-              <p className="text-sm text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                {therapist.description}
-              </p>
+            <p className="text-sm text-gray-500">
+              {therapist.primaryCredential}
+              {therapist.primaryCredentialAlt && `, ${therapist.primaryCredentialAlt}`}
+            </p>
+            {therapist.tagline && (
+              <p className="text-sm text-gray-700 mt-2 max-w-md mx-auto">{therapist.tagline}</p>
+            )}
+            {therapist.phone && (
+              <a
+                href={`tel:${therapist.phone}`}
+                className="inline-block mt-3 text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-full text-sm"
+              >
+                📞 {therapist.phone}
+              </a>
+            )}
+            {therapist.website && (
+              <a
+                href={therapist.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 inline-block mt-3 border border-teal-600 text-teal-600 px-4 py-2 rounded-full text-sm hover:bg-teal-50"
+              >
+                website
+              </a>
             )}
           </div>
         </div>
 
-        {/* Quick Facts */}
-        <Card title="Quick Facts">
-          <Fact label="Profession" value={therapist.professions} />
-          <Fact label="Credential" value={therapist.primaryCredential} />
-          <Fact label="Billing" value={therapist.billing} />
-          <Fact label="Languages" value={therapist.languages?.join(', ')} />
-          <Fact label="Groups" value={therapist.groups?.join(', ')} />
-          <Fact label="Concerns Treated" value={therapist.clientConcerns?.join(', ')} />
-        </Card>
-
-        {/* About */}
-        <Card title="About">{therapist.description}</Card>
-
-        {/* Location */}
-        <Card title="Location">
-          <p>
-            {therapist.city}, {therapist.state}
-          </p>
-          <p className="text-sm text-gray-600">{therapist.locationNote}</p>
+        {/* Finances */}
+        <Card title="Finances">
+          <Fact label="Individual Fee" value={therapist.feeIndividual} />
+          <Fact label="Couples Fee" value={therapist.feeCouples} />
+          {therapist.slidingScale && <p className="text-sm text-green-700">✅ Sliding Scale</p>}
+          {therapist.freeConsultation && <p className="text-sm text-green-700">✅ Free Consultation</p>}
+          <Fact label="Payment Methods" value={therapist.paymentMethods?.join(', ')} />
+          <Fact label="Insurance" value={therapist.insuranceAccepted} />
+          {therapist.feeComment && <p className="text-sm italic text-gray-500 mt-2">{therapist.feeComment}</p>}
         </Card>
 
         {/* Qualifications */}
         <Card title="Qualifications">
-          <Fact label="License" value={therapist.licenseStatus} />
-          <Fact label="Years in Practice" value={therapist.yearsInPractice} />
-          <Fact label="Education" value={therapist.education} />
+          <Fact label="License Status" value={therapist.licenseStatus} />
+          <Fact label="License #" value={therapist.licenseNumber} />
+          <Fact label="License State" value={therapist.licenseState} />
+          <Fact
+            label="License Exp."
+            value={
+              therapist.licenseExpirationMonth && therapist.licenseExpirationYear
+                ? `${therapist.licenseExpirationMonth}/${therapist.licenseExpirationYear}`
+                : undefined
+            }
+          />
+          <Fact label="Education" value={therapist.educationSchool} />
+          <Fact label="Degree" value={therapist.educationDegree} />
+          <Fact label="Graduated" value={therapist.educationYearGraduated?.toString()} />
+          <Fact label="Years in Practice" value={therapist.practiceStartYear?.toString()} />
         </Card>
 
-        {/* Specialties & Expertise */}
-        <Card title="Specialties & Expertise">
-          <Fact label="Specialties" value={therapist.specialties?.join(', ')} />
-          <Fact label="Expertise" value={therapist.expertise?.join(', ')} />
+        {/* Specialties & Issues */}
+        <Card title="Specialties & Issues">
+          <Fact label="Specialties" value={therapist.specialtyDescription} />
+          <Fact label="Issues" value={therapist.issues?.join(', ')} />
           <Fact label="Sexuality" value={therapist.sexuality} />
         </Card>
 
-        {/* Availability */}
-        <Card title="Availability">{therapist.availabilityNote}</Card>
+        {/* Treatment Style */}
+        {therapist.treatmentStyleDescription && (
+          <Card title="Treatment Style">
+            <p className="text-sm text-gray-800">{therapist.treatmentStyleDescription}</p>
+          </Card>
+        )}
 
-        {/* Treatment Preferences */}
-        <Card title="Treatment Preferences">
-          <Fact label="Therapy Types" value={therapist.therapyTypes?.join(', ')} />
-          <p className="text-sm text-gray-600">{therapist.therapyApproachNote}</p>
-        </Card>
-
-        {/* Nearby Areas */}
-        <Card title="Nearby Areas">
-          <Fact label="Cities" value={therapist.nearbyCities?.join(', ')} />
-          <Fact label="Neighborhoods" value={therapist.nearbyNeighborhoods?.join(', ')} />
+        {/* Location */}
+        <Card title="Location">
+          <p>
+            {therapist.primaryCity || 'City'}, {therapist.primaryState || 'State'} {therapist.primaryZip || ''}
+          </p>
+          {therapist.locationDescription && (
+            <p className="text-sm text-gray-600">{therapist.locationDescription}</p>
+          )}
+          {nearby && <p className="text-sm text-gray-500 mt-1">Also near: {nearby}</p>}
         </Card>
       </div>
     </div>
@@ -168,7 +198,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
-      <div className="space-y-1 text-sm text-gray-800">{children}</div>
+      <div className="space-y-2 text-sm text-gray-800">{children}</div>
     </div>
   )
 }

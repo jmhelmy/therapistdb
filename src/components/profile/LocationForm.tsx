@@ -3,123 +3,137 @@
 import React from 'react'
 
 interface LocationFormProps {
-  formData: any
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
+  formData: {
+    primaryAddress: string
+    primaryCity: string
+    primaryState: string
+    primaryZip: string
+    additionalAddress: string
+    additionalCity: string
+    additionalState: string
+    additionalZip: string
+    telehealth: boolean
+    inPerson: boolean
+    locationDescription: string
+  }
+  handleChange: (e: React.ChangeEvent<any>) => void
 }
 
 export default function LocationForm({ formData, handleChange }: LocationFormProps) {
   return (
-    <div className="bg-white shadow-sm rounded-lg p-8 space-y-10 max-w-3xl mx-auto">
-      <div className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+    <div className="bg-white shadow-sm rounded-lg p-8 space-y-6 max-w-2xl mx-auto">
+      <div className="flex items-center space-x-2 text-lg font-semibold text-gray-800">
         <span>📍</span>
         <h2>Location</h2>
       </div>
 
-      {/* Primary Location */}
+      {/* Primary Office */}
       <div className="space-y-4">
         <h3 className="font-bold text-gray-800">Primary Location</h3>
-        <input name="address" placeholder="Address" value={formData.address} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="city" placeholder="City" value={formData.city} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="state" placeholder="State" value={formData.state} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="zip" placeholder="Zip Code" value={formData.zip} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
+        <input
+          name="primaryAddress"
+          placeholder="Address"
+          value={formData.primaryAddress}
+          onChange={handleChange}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+        />
+        <div className="grid grid-cols-3 gap-4">
+          <input
+            name="primaryCity"
+            placeholder="City"
+            value={formData.primaryCity}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+          <input
+            name="primaryState"
+            placeholder="State"
+            value={formData.primaryState}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+          <input
+            name="primaryZip"
+            placeholder="ZIP"
+            value={formData.primaryZip}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+        </div>
       </div>
 
-      {/* Additional Location */}
+      {/* Additional Office */}
       <div className="space-y-4">
-        <h3 className="font-bold text-gray-800">Additional Location</h3>
-        <input name="address2" placeholder="Address" value={formData.address2} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="city2" placeholder="City" value={formData.city2} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="state2" placeholder="State" value={formData.state2} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
-        <input name="zip2" placeholder="Zip Code" value={formData.zip2} onChange={handleChange}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded" />
+        <h3 className="font-bold text-gray-800">Additional Location (optional)</h3>
+        <input
+          name="additionalAddress"
+          placeholder="Address"
+          value={formData.additionalAddress}
+          onChange={handleChange}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+        />
+        <div className="grid grid-cols-3 gap-4">
+          <input
+            name="additionalCity"
+            placeholder="City"
+            value={formData.additionalCity}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+          <input
+            name="additionalState"
+            placeholder="State"
+            value={formData.additionalState}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+          <input
+            name="additionalZip"
+            placeholder="ZIP"
+            value={formData.additionalZip}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          />
+        </div>
       </div>
 
       {/* Telehealth & In-Person */}
-      <div>
-        <h3 className="font-bold text-gray-800 mb-1">Telehealth and In-Person</h3>
-        <p className="text-sm text-gray-500 mb-3">
-          Put a star next to the issues that are a top issue that you work with. Maximum 3 top issues
-        </p>
-        <div className="flex space-x-6">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name="inPerson"
-              checked={formData.inPerson}
-              onChange={(e) => handleChange({ ...e, target: { ...e.target, value: e.target.checked } })}
-            />
-            <span>In-person</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name="teletherapy"
-              checked={formData.teletherapy}
-              onChange={(e) => handleChange({ ...e, target: { ...e.target, value: e.target.checked } })}
-            />
-            <span>Teletherapy</span>
-          </label>
-        </div>
+      <div className="space-y-2">
+        <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            name="telehealth"
+            checked={formData.telehealth}
+            onChange={handleChange}
+            className="form-checkbox"
+          />
+          <span className="ml-2">Offers telehealth</span>
+        </label>
+        <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            name="inPerson"
+            checked={formData.inPerson}
+            onChange={handleChange}
+            className="form-checkbox"
+          />
+          <span className="ml-2">Offers in-person</span>
+        </label>
       </div>
 
-      {/* Location In Your Own Words */}
+      {/* Location Description */}
       <div>
-        <h3 className="font-bold text-gray-800 mb-1">Location in your own words</h3>
-        <p className="text-sm text-gray-500 mb-2">
-          Any thoughts about how to get there, or remote vs teletherapy
-        </p>
+        <label className="block text-sm font-bold text-gray-800 mb-1">
+          Location Description
+        </label>
         <textarea
-          name="locationNotes"
-          value={formData.locationNotes}
+          name="locationDescription"
+          value={formData.locationDescription}
           onChange={handleChange}
-          rows={4}
-          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded resize-none"
+          rows={3}
+          className="w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded"
+          placeholder="E.g. Office is on the 2nd floor, suite 210"
         />
-      </div>
-
-      {/* SEO Location */}
-      <div className="space-y-4">
-        <h3 className="font-bold text-gray-800 flex items-center space-x-2">
-          <span>📍</span>
-          <span>SEO Location</span>
-        </h3>
-
-        {/* Zip Codes */}
-        <div>
-          <p className="font-medium text-gray-700">Nearby zip codes</p>
-          {[1, 2, 3].map((i) => (
-            <input
-              key={i}
-              name={`nearbyZip${i}`}
-              placeholder="Zip Code"
-              value={formData[`nearbyZip${i}`] || ''}
-              onChange={handleChange}
-              className="w-full mt-1 mb-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded"
-            />
-          ))}
-        </div>
-
-        {/* Cities */}
-        <div>
-          <p className="font-medium text-gray-700">Nearby cities</p>
-          {[1, 2, 3].map((i) => (
-            <input
-              key={i}
-              name={`nearbyCity${i}`}
-              placeholder="City"
-              value={formData[`nearbyCity${i}`] || ''}
-              onChange={handleChange}
-              className="w-full mt-1 mb-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded"
-            />
-          ))}
-        </div>
       </div>
     </div>
   )

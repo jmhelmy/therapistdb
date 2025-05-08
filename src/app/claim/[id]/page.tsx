@@ -1,81 +1,79 @@
-/* -------------------------------------------------------------------------- */
-/*  src/app/claim/[id]/page.tsx                                               */
-/* -------------------------------------------------------------------------- */
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function ClaimPage() {
-  const { id }  = useParams<{ id: string }>();
-  const router  = useRouter();
+  const { id } = useParams<{ id: string }>()
+  const router = useRouter()
 
-  /* ---------------------------------------------------------------------- */
-  /* local state                                                            */
-  /* ---------------------------------------------------------------------- */
-  const [therapist, setTherapist] = useState<{ name?: string } | null>(null);
-  const [email,     setEmail]     = useState('');
-  const [password,  setPassword]  = useState('');
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState<string | null>(null);
+  // UI state
+  const [therapistName, setTherapistName] = useState<string | null>(null)
+  const [email, setEmail]                 = useState('')
+  const [password, setPassword]           = useState('')
+  const [loading, setLoading]             = useState(false)
+  const [error, setError]                 = useState<string | null>(null)
 
-  /* ---------------------------------------------------------------------- */
-  /* fetch the therapist’s name once                                         */
-  /* ---------------------------------------------------------------------- */
+  // Load the therapist’s name for display
   useEffect(() => {
-    if (!id) return;
-
+    if (!id) return
     fetch(`/api/therapists/${id}`)
-      .then(res => res.json())
-      .then(setTherapist)
-      .catch(() => setTherapist({ name: undefined }));   // still render page
-  }, [id]);
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to load profile')
+        return r.json()
+      })
+      .then(data => setTherapistName(data.name ?? null))
+      .catch(() => setTherapistName(null))
+  }, [id])
 
-  /* ---------------------------------------------------------------------- */
-  /* submit handler                                                          */
-  /* ---------------------------------------------------------------------- */
+  // Handle the “Claim and continue” form submit
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
     try {
-      const res  = await fetch('/api/register', {
-        method : 'POST',
+      // 1) Register, passing the claimId so your backend can attach userId to that therapist
+      const res = await fetch('/api/register', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ email, password, claimId: id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+        body: JSON.stringify({ email, password, claimId: id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Claim failed')
 
-      /* stash id so /build-profile opens the claimed record  */
-      localStorage.setItem('therapistId', data.user.therapistId);
-      router.push('/build-profile');
+      // 2) Immediately sign in with credentials
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      })
+      if (result?.error) throw new Error(result.error)
+
+      // 3) Redirect to the build-profile flow
+      router.push('/build-profile')
     } catch (err: any) {
-      setError(err.message || 'Something went wrong.');
+      console.error('Claim error:', err)
+      setError(err.message || 'Something went wrong.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  /* ---------------------------------------------------------------------- */
-  /* UI                                                                      */
-  /* ---------------------------------------------------------------------- */
   return (
     <main className="min-h-screen bg-[#FAFBFA] flex items-start justify-center py-24 px-4">
       <div className="w-full max-w-lg bg-white shadow-lg rounded-xl px-10 py-12">
-        {/* Page title */}
-        <h1 className="text-2xl font-extrabold text-center mb-2">Claim profile</h1>
-
-        {/* Therapist name (or fallback while loading) */}
+        <h1 className="text-2xl font-extrabold text-center mb-2">Claim Profile</h1>
         <h2 className="text-3xl font-black text-center text-gray-900 mb-8 leading-tight">
-          {therapist?.name ? therapist.name : '…'}
+          {therapistName ?? '…'}
         </h2>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               required
@@ -87,7 +85,9 @@ export default function ClaimPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Create Password</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">
+              Create Password
+            </label>
             <input
               type="password"
               required
@@ -107,21 +107,10 @@ export default function ClaimPage() {
                        text-white font-semibold px-6 py-3 rounded-full
                        disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Registering…' : 'Claim and continue'}
+            {loading ? 'Claiming…' : 'Claim and continue'}
           </button>
         </form>
-
-        {/* Secondary link */}
-        <p className="text-center text-sm text-gray-600 mt-6">
-          <button
-            type="button"
-            className="underline hover:text-gray-800"
-            onClick={() => alert('We will add a removal workflow soon.')}
-          >
-            Ask to remove profile
-          </button>
-        </p>
       </div>
     </main>
-  );
+  )
 }

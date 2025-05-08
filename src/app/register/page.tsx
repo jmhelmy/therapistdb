@@ -1,15 +1,15 @@
-/* ── src/app/register/page.tsx ───────────────────────────────────────── */
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [email, setEmail]       = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,18 +17,32 @@ export default function RegisterPage() {
     setError(null)
 
     try {
-      const res  = await fetch('/api/register', {
-        method : 'POST',
+      // Step 1: Register the user
+      const res = await fetch('/api/register', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({ email, password })   // ← no claimId here
+        body: JSON.stringify({ email, password })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Registration failed')
 
-      // new blank therapist record is generated in the API route
+      // Step 2: Sign in using credentials
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+        callbackUrl: '/build-profile'
+      })
+
+      if (result?.error) {
+        throw new Error(result.error)
+      }
+
+      // Step 3: Save therapist ID and redirect manually
       localStorage.setItem('therapistId', data.user.therapistId)
       router.push('/build-profile')
     } catch (err: any) {
+      console.error('Registration error:', err)
       setError(err.message || 'Something went wrong.')
     } finally {
       setLoading(false)
@@ -38,20 +52,14 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-[#FAFBFA] flex items-start justify-center px-4 pt-16 pb-32 sm:pt-24">
       <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-10">
-        {/* Title */}
         <header className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Get listed</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Register a new therapist account.
-          </p>
+          <p className="text-sm text-gray-500 mt-1">Register a new therapist account.</p>
         </header>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               type="email"
               required
@@ -62,9 +70,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Create password
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Create password</label>
             <input
               type="password"
               required
@@ -85,7 +91,6 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Footer link */}
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{' '}
           <a href="/login" className="text-teal-700 font-medium hover:underline">

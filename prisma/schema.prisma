@@ -1,74 +1,91 @@
 // prisma/schema.prisma
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
   id        String     @id @default(uuid())
   email     String     @unique
   password  String
-  name      String?
-  createdAt DateTime   @default(now())
   therapist Therapist?
 }
 
 model Therapist {
-  id                   String     @id @default(uuid())
-  name                 String
-  slug                 String     @unique
-  imageUrl             String?
-  city                 String?
-  state                String?
-  licenseStatus        String?
-  licenseNumber        String?
-  licenseState         String?
-  licenseExpiration    DateTime?
-  primaryCredential    String?
-  description          String?
-  professions          String?
-  title                String?
-  credentials          String?
-  mentalHealthRole     String?
-  phone                String?
-  education            String?
-  yearsInPractice      String?
-  primaryOffice        String?
-  additionalOffice     String?
-  telephone            String?
-  billing              String?
-  fees                 String?
-  paymentMethods       String[]
-  insurance            String[]
-  npi                  String?
-  profInsurance        String?
-  gender               String?
-  faithOrientation     String?
-  languages            String[]
-  communities          String[]
-  clientConcerns       String[]
-  typesOfTherapy       String[]
-  services             String[]
-  ages                 String[]
-  groups               String[]
-  specialties          String[]   @default([])
-  expertise            String[]   @default([])
-  sexuality            String?
-  availabilityNote     String?
-  therapyTypes         String[]   @default([])
-  therapyApproachNote  String?
-  nearbyCities         String[]   @default([])
-  nearbyNeighborhoods  String[]   @default([])
-  locationNote         String?
-  profileComplete      Boolean    @default(false)
-  published            Boolean    @default(false)
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  userId               String?    @unique
-  user                 User?      @relation(fields: [userId], references: [id])
+  id                        String   @id @default(uuid())
+  userId                    String?  @unique
+  user                      User?    @relation(fields: [userId], references: [id])
+  slug                      String   @unique
+  imageUrl                  String?
+  published                 Boolean  @default(false)
+
+  name                      String
+  primaryCredential         String?        // first box
+  primaryCredentialAlt      String?        // second box
+  gender                    String?
+  phone                     String?
+  workEmail                 String?        // “Email – Premium users only”
+  website                   String?
+
+  primaryAddress            String?
+  primaryCity               String?
+  primaryState              String?
+  primaryZip                String?
+  additionalAddress         String?
+  additionalCity            String?
+  additionalState           String?
+  additionalZip             String?
+  telehealth                Boolean  @default(false)
+  inPerson                  Boolean  @default(false)
+  locationDescription       String?
+
+  seoZip1                   String?
+  seoZip2                   String?
+  seoZip3                   String?
+  nearbyCity1               String?
+  nearbyCity2               String?
+  nearbyCity3               String?
+
+  feeIndividual             String?
+  feeCouples                String?
+  slidingScale              Boolean  @default(false)
+  freeConsultation          Boolean  @default(false)
+  feeComment                String?
+  paymentMethods            String[] @default([])
+  insuranceAccepted         String?
+
+  licenseStatus             String?
+  profession                String?
+  licenseNumber             String?
+  licenseState              String?
+  licenseExpirationMonth    Int?
+  licenseExpirationYear     Int?
+
+  educationSchool           String?
+  educationDegree           String?
+  educationYearGraduated    Int?
+  practiceStartYear         Int?
+
+  tagline                   String?
+
+  personalStatement1        String?
+  personalStatement2        String?
+  personalStatement3        String?
+
+  issues                    String[] @default([])
+  specialtyDescription      String?
+  mentalHealthRoles         String[] @default([])
+  sexuality                 String?
+  ages                      String[] @default([])
+  participants              String[] @default([])
+  communities               String[] @default([])
+  languages                 String[] @default([])
+  topIssues                 String[] @default([])
+
+  treatmentStyle            String[] @default([])
+  treatmentStyleDescription String?
 }
