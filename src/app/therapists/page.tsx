@@ -1,4 +1,7 @@
-// src/app/therapists/page.tsx
+// Force this page to be rendered at request time instead of prerendered
+export const dynamic = 'force-dynamic'
+
+
 import ClientFilters from '@/components/ClientFilters'
 import { prisma } from '@/lib/prisma'
 import Image from 'next/image'
