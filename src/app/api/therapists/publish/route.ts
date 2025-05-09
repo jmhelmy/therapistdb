@@ -1,46 +1,62 @@
-// src/app/api/therapists/publish/route.ts
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import slugify from 'slugify'
 
 export async function POST(req: Request) {
-  // 1) Auth
   const session = await getServerSession(authOptions)
+
   if (!session?.user?.id) {
+    console.error('❌ No session user ID')
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2) Parse body
-  const { id } = await req.json()
-  if (!id) {
-    return NextResponse.json(
-      { success: false, message: 'Missing id' },
-      { status: 400 }
-    )
+  const { id, name } = await req.json()
+  console.log('📦 Received from frontend:', { id, name })
+
+  if (!id || !name?.trim()) {
+    console.error('❌ Missing id or name')
+    return NextResponse.json({ success: false, message: 'Missing id or name.' }, { status: 400 })
   }
 
-  // 3) Ownership check
   const existing = await prisma.therapist.findUnique({ where: { id } })
+  console.log('🔍 Fetched therapist:', existing)
+
   if (!existing || existing.userId !== session.user.id) {
-    return NextResponse.json(
-      { success: false, message: 'Not found or access denied' },
-      { status: 404 }
-    )
+    console.error('❌ Therapist not found or user mismatch')
+    return NextResponse.json({ success: false, message: 'Not found or access denied.' }, { status: 404 })
   }
 
-  // 4) Publish
+  // Only regenerate slug if none exists
+  let slug = existing.slug
+  if (!slug) {
+    const base = slugify(name, { lower: true, strict: true })
+    slug = base
+    let suffix = 1
+
+    while (true) {
+      const slugExists = await prisma.therapist.findUnique({ where: { slug } })
+      if (!slugExists || slugExists.id === id) break
+      slug = `${base}-${suffix++}`
+    }
+  } else {
+    console.log('🟡 Skipping slug generation — already has one:', slug)
+  }
+
   try {
-    await prisma.therapist.update({
+    const updated = await prisma.therapist.update({
       where: { id },
-      data: { published: true },
+      data: {
+        published: true,
+        slug,
+      },
     })
-    return NextResponse.json({ success: true })
+
+    console.log('✅ Successfully published therapist:', updated)
+    return NextResponse.json({ success: true, slug: updated.slug })
   } catch (err: any) {
-    console.error('POST /api/therapists/publish error', err)
-    return NextResponse.json(
-      { success: false, message: 'DB update failed' },
-      { status: 500 }
-    )
+    console.error('❌ Error updating therapist:', err)
+    return NextResponse.json({ success: false, message: 'DB update failed.' }, { status: 500 })
   }
 }

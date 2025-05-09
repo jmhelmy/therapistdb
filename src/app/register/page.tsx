@@ -16,15 +16,20 @@ export default function RegisterPage() {
     setError(null)
 
     try {
+      // Step 1: Register the user + therapist profile
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       })
 
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Registration failed')
 
+      // Step 2: Sign in with credentials
       const signInRes = await signIn('credentials', {
         email,
         password,
@@ -35,8 +40,10 @@ export default function RegisterPage() {
         throw new Error(signInRes.error)
       }
 
+      // Step 3: Redirect to profile builder
       window.location.href = '/build-profile'
     } catch (err: any) {
+      console.error('❌ Registration error:', err)
       setError(err.message || 'Something went wrong.')
       setLoading(false)
     }

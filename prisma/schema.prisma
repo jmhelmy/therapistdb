@@ -1,4 +1,5 @@
 // prisma/schema.prisma
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -16,19 +17,19 @@ model User {
 }
 
 model Therapist {
-  id                        String   @id @default(uuid())
-  userId                    String?  @unique
-  user                      User?    @relation(fields: [userId], references: [id])
-  slug                      String   @unique
+  id                        String    @id @default(uuid())
+  userId                    String?   @unique
+  user                      User?     @relation(fields: [userId], references: [id])
+  slug                      String?   @unique
   imageUrl                  String?
-  published                 Boolean  @default(false)
+  published                 Boolean   @default(false)
 
-  name                      String
-  primaryCredential         String?        // first box
-  primaryCredentialAlt      String?        // second box
+  name                      String?
+  primaryCredential         String?
+  primaryCredentialAlt      String?
   gender                    String?
   phone                     String?
-  workEmail                 String?        // “Email – Premium users only”
+  workEmail                 String?
   website                   String?
 
   primaryAddress            String?
@@ -39,8 +40,8 @@ model Therapist {
   additionalCity            String?
   additionalState           String?
   additionalZip             String?
-  telehealth                Boolean  @default(false)
-  inPerson                  Boolean  @default(false)
+  telehealth                Boolean   @default(false)
+  inPerson                  Boolean   @default(false)
   locationDescription       String?
 
   seoZip1                   String?
@@ -52,10 +53,10 @@ model Therapist {
 
   feeIndividual             String?
   feeCouples                String?
-  slidingScale              Boolean  @default(false)
-  freeConsultation          Boolean  @default(false)
+  slidingScale              Boolean   @default(false)
+  freeConsultation          Boolean   @default(false)
   feeComment                String?
-  paymentMethods            String[] @default([])
+  paymentMethods            String[]  @default([])
   insuranceAccepted         String?
 
   licenseStatus             String?
@@ -76,16 +77,16 @@ model Therapist {
   personalStatement2        String?
   personalStatement3        String?
 
-  issues                    String[] @default([])
+  issues                    String[]  @default([])
   specialtyDescription      String?
-  mentalHealthRoles         String[] @default([])
+  mentalHealthRoles         String[]  @default([])
   sexuality                 String?
-  ages                      String[] @default([])
-  participants              String[] @default([])
-  communities               String[] @default([])
-  languages                 String[] @default([])
-  topIssues                 String[] @default([])
+  ages                      String[]  @default([])
+  participants              String[]  @default([])
+  communities               String[]  @default([])
+  languages                 String[]  @default([])
+  topIssues                 String[]  @default([])
 
-  treatmentStyle            String[] @default([])
+  treatmentStyle            String[]  @default([])
   treatmentStyleDescription String?
 }

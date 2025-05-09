@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Therapist" ALTER COLUMN "name" DROP NOT NULL,
+ALTER COLUMN "slug" DROP NOT NULL;

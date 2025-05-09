@@ -1,4 +1,14 @@
-export default function HomePage() {
+import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+import { authOptions } from '@/lib/auth' // adjust path to your actual auth config
+
+export default async function HomePage() {
+  const session = await getServerSession(authOptions)
+
+  if (session) {
+    redirect('/build-profile')
+  }
+
   return (
     <main className="bg-[#f9f9f7] min-h-screen">
       {/* Hero Section */}
@@ -8,25 +18,24 @@ export default function HomePage() {
         </h1>
 
         <form
-  action="/therapists"
-  method="GET"
-  className="max-w-xl mx-auto flex flex-col gap-4"
->
-  <input
-    type="text"
-    name="zip"
-    placeholder="Enter zip code"
-    className="border border-gray-300 rounded-md px-4 py-2 placeholder-gray-500"
-    required/>
-  <button
-    type="submit"
-    className="bg-[#009688] hover:bg-[#00796B] text-white py-2 rounded-md font-medium"
-  >
-    Search
-  </button>
-</form>
-
-
+          action="/therapists"
+          method="GET"
+          className="max-w-xl mx-auto flex flex-col gap-4"
+        >
+          <input
+            type="text"
+            name="zip"
+            placeholder="Enter zip code"
+            className="border border-gray-300 rounded-md px-4 py-2 placeholder-gray-500"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-[#009688] hover:bg-[#00796B] text-white py-2 rounded-md font-medium"
+          >
+            Search
+          </button>
+        </form>
       </section>
 
       {/* Popular Categories */}
@@ -59,7 +68,10 @@ export default function HomePage() {
           Common Cities
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {['Los Angeles', 'New York', 'San Diego', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd'].map((city, idx) => (
+          {[
+            'Los Angeles', 'New York', 'San Diego',
+            'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd'
+          ].map((city, idx) => (
             <div
               key={idx}
               className="bg-white border rounded-md shadow-sm p-4 flex items-center justify-center text-sm text-[#425F80] text-center h-24"
@@ -118,5 +130,5 @@ export default function HomePage() {
         </div>
       </footer>
     </main>
-  );
+  )
 }

@@ -1,22 +1,43 @@
-// src/app/api/therapists/[id]/upload/route.ts
-import { writeFile } from 'fs/promises'
+// src/app/api/uploads/route.ts
+
+export const runtime = 'nodejs'  // ← must be first line
+
+import formidable from 'formidable'
+import fs from 'fs'
 import path from 'path'
 import { NextResponse } from 'next/server'
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const formData = await req.formData()
-  const file = formData.get('file') as File
+// Disable Next’s default body parsing so formidable can handle it
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
 
-  if (!file || !params.id) {
-    return NextResponse.json({ error: 'Missing file or ID' }, { status: 400 })
+export async function POST(req: Request) {
+  // Ensure the uploads folder exists
+  const uploadDir = path.join(process.cwd(), 'public/uploads')
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true })
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const filename = `${params.id}-${Date.now()}-${file.name}`
-  const filePath = path.join(process.cwd(), 'public/uploads', filename)
+  // Parse the multipart form
+  const form = new formidable.IncomingForm({ uploadDir, keepExtensions: true })
+  const files = await new Promise<formidable.Files>((resolve, reject) => {
+    form.parse(req as any, (err, _fields, files) => {
+      if (err) reject(err)
+      else resolve(files)
+    })
+  })
 
-  await writeFile(filePath, buffer)
+  // Grab the file (expect field name “file”)
+  const fileField = Array.isArray(files.file) ? files.file[0] : files.file
+  if (!fileField || typeof (fileField as any).filepath !== 'string') {
+    return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+  }
 
+  // Return the public URL
+  const filename = path.basename((fileField as any).filepath)
   const url = `/uploads/${filename}`
   return NextResponse.json({ url })
 }

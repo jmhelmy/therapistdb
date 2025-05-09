@@ -1,19 +1,36 @@
+/* 1) Inject Tailwind’s base reset, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* 2) Import your Google font (next/font/google handles the variable, so no @import needed here) */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* 3) Your custom overrides */
 body {
-  @apply bg-[#F9FAF9] text-[#181818] font-sans antialiased;
+  /* Use the CSS variable from next/font/google */
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 500;
+  font-size: 14pt;
+  color: #303030;
+  background-color: #F9FAF9; /* match your layout */
 }
+
+/* If you still need box-sizing reset, you can leave this, but it’s redundant with Tailwind’s preflight */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* You can remove these—Tailwind’s preflight handles sensible defaults for html, body, lists, etc */
+/*
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+*/

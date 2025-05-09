@@ -1,7 +1,7 @@
-// src/components/profile/ProfileHeader.tsx
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 interface ProfileHeaderProps {
   published: boolean
@@ -21,16 +21,18 @@ export default function ProfileHeader({
   return (
     <div className="flex items-center justify-between px-6 py-4 border-b bg-white rounded-t-xl">
       <div className="flex items-center space-x-3">
-        {/* Profile icon */}
-        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-          <svg
-            className="w-5 h-5 text-gray-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 0114 0H3z" />
-          </svg>
-        </div>
+        {/* Profile icon linking to account page */}
+        <Link href="/account">
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300">
+            <svg
+              className="w-5 h-5 text-gray-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 12a5 5 0 100-10 5 5 0 000 10zm-7 8a7 7 0 0114 0H3z" />
+            </svg>
+          </div>
+        </Link>
         <h1 className="text-lg font-semibold">Edit Profile</h1>
       </div>
 

@@ -5,8 +5,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const { id } = params
 
   try {
-    const therapist = await prisma.therapist.findUnique({
-      where: { id },
+    const therapist = await prisma.therapist.findFirst({
+      where: {
+        OR: [
+          { id },
+          { slug: id },
+        ],
+      },
     })
 
     if (!therapist) {
@@ -14,9 +19,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 
     return NextResponse.json(therapist)
-  } catch (err: any) {
-    console.error('GET /api/therapists/[id] error', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+  } catch (error: any) {
+    console.error('GET /api/therapists/[id] error', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
@@ -48,7 +53,6 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       : null,
   }
 
-  // 🛑 Prisma will throw if you try to update `id`
   delete (data as any).id
 
   try {

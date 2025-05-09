@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server'
 import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
-import slugify from 'slugify'
 
 export async function POST(req: Request) {
   try {
@@ -15,9 +14,12 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+    const cleanEmail = email.trim().toLowerCase()
 
-    // 2) Prevent duplicate signup
-    const existing = await prisma.user.findUnique({ where: { email } })
+    // 2) Prevent duplicates
+    const existing = await prisma.user.findUnique({
+      where: { email: cleanEmail },
+    })
     if (existing) {
       return NextResponse.json(
         { error: 'User already exists.' },
@@ -25,52 +27,37 @@ export async function POST(req: Request) {
       )
     }
 
-    // 3) Hash password
+    // 3) Hash & create user
     const hashedPassword = await hash(password, 10)
-
-    // 4) Create user
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword },
+      data: { email: cleanEmail, password: hashedPassword },
     })
 
     let therapistId: string
 
     if (claimId) {
-      // 5a) Claim flow: link existing therapist
+      // 4a) Claim an existing profile
       const updated = await prisma.therapist.update({
         where: { id: claimId },
-        data: { userId: user.id },
+        data: {
+          user: { connect: { id: user.id } },
+        },
       })
       therapistId = updated.id
     } else {
-      // 5b) New therapist flow: generate a slug and seed minimal fields
-      const base = slugify(email.split('@')[0], { lower: true, strict: true })
-      const slug = `${base}-${Date.now()}`
-
+      // 4b) Create a blank new profile
       const therapist = await prisma.therapist.create({
         data: {
-          userId: user.id,
-          name: 'Unnamed Therapist',
-          slug,
+          user: { connect: { id: user.id } },
+          name: null,
+          slug: null,
           published: false,
-          imageUrl: '',
-          primaryAddress: '',
-          primaryCity: '',
-          primaryState: '',
-          primaryZip: '',
-          feeIndividual: '',
-          feeCouples: '',
-          slidingScale: false,
-          paymentMethods: [],
-          insuranceAccepted: '',
-          issues: [],
-          languages: [],
         },
       })
       therapistId = therapist.id
     }
 
-    // 6) Respond
+    // 5) Return success
     return NextResponse.json(
       {
         user: { id: user.id, email: user.email },
@@ -79,7 +66,7 @@ export async function POST(req: Request) {
       { status: 201 }
     )
   } catch (err: any) {
-    console.error('Registration error:', err)
+    console.error('❌ Registration error:', err)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

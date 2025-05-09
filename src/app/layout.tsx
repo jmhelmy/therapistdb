@@ -1,11 +1,15 @@
 // src/app/layout.tsx
+
 import './globals.css'
 import type { Metadata } from 'next'
 import { Montserrat } from 'next/font/google'
-import Header from '@/components/Header'
+import ConditionalHeader from '@/components/ConditionalHeader'
 import Providers from './providers'
+import Script from 'next/script'
 
+// Load Montserrat 500 and expose as a CSS variable
 const montserrat = Montserrat({
+  weight: ['500'],
   subsets: ['latin'],
   variable: '--font-montserrat',
   display: 'swap',
@@ -16,18 +20,19 @@ export const metadata: Metadata = {
   description: 'Find mental health professionals near you',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={montserrat.variable}>
-      {/* This <head /> is required to pick up app/head.tsx */}
-      <head />
-      <body className="font-sans bg-[#F9FAF9] text-[#181818] antialiased">
+      <head>
+        {/* Load Cloudinary Upload Widget before hydration */}
+        <Script
+          src="https://upload-widget.cloudinary.com/global/all.js"
+          strategy="beforeInteractive"
+        />
+      </head>
+      <body className="font-sans bg-[#F9FAF9] antialiased">
         <Providers>
-          <Header />
+          <ConditionalHeader />
           <main>{children}</main>
         </Providers>
       </body>

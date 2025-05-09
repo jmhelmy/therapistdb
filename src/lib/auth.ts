@@ -1,4 +1,5 @@
 // src/lib/auth.ts
+
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
@@ -6,24 +7,19 @@ import { prisma } from "./prisma"
 import { NextAuthOptions } from "next-auth"
 
 export const authOptions: NextAuthOptions = {
-  // Secret used to encrypt/sign your JWTs and session cookies
   secret: process.env.NEXTAUTH_SECRET,
 
-  // Use Prisma adapter to persist users in your database
   adapter: PrismaAdapter(prisma),
 
-  // Use JWT sessions
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // 👈 this must be database for PrismaAdapter
   },
 
-  // Override the default sign-in and error pages
   pages: {
     signIn: "/register",
     error: "/register",
   },
 
-  // Configure a simple email/password provider
   providers: [
     CredentialsProvider({
       name: "Email & Password",
@@ -35,20 +31,20 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           throw new Error("Missing email or password")
         }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         })
+
         if (!user) {
           throw new Error("No user found with that email")
         }
+
         const isValid = await compare(credentials.password, user.password)
         if (!isValid) {
           throw new Error("Invalid password")
         }
-        // Return the user object (without the password)
-        // NextAuth will include this on the session token
-        // and make it available via useSession()
-        // (you add id & email below in callbacks)
+
         const { password, ...safeUser } = user
         return safeUser
       },
@@ -56,14 +52,42 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    // Persist the user ID to the token right after sign in
+    async signIn({ user }) {
+      if (!user?.id) return false
+
+      try {
+        console.log('🔐 signIn callback triggered for user:', user.email)
+
+        const existing = await prisma.therapist.findUnique({
+          where: { userId: user.id },
+        })
+
+        if (!existing) {
+          console.log('🧠 No therapist found, creating new one for:', user.email)
+          await prisma.therapist.create({
+            data: {
+              userId: user.id,
+              name: user.email?.split('@')[0] || 'New Therapist',
+              slug: `${user.email?.split('@')[0]?.toLowerCase() || 'therapist'}-${Math.random().toString(36).substring(2, 6)}`,
+              published: false,
+            },
+          })
+        }
+      } catch (err) {
+        console.error('❌ Error in signIn callback:', err)
+        return false
+      }
+
+      return true
+    },
+
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
       }
       return token
     },
-    // Make the ID available on the session object
+
     async session({ session, token }) {
       if (token?.id) {
         session.user = {
