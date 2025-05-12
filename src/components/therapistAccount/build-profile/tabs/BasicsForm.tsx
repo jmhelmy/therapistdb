@@ -3,11 +3,13 @@
 import { useFormContext } from 'react-hook-form'
 import TextField from '@/components/fields/TextField'
 import ImageUploadField from '@/components/fields/ImageUploadField'
+import { ChangeEvent } from 'react'
 
 export default function BasicsForm() {
   const {
     register,
     formState: { errors },
+    setValue,
   } = useFormContext<{
     name: string
     primaryCredential?: string
@@ -80,6 +82,9 @@ export default function BasicsForm() {
         type="email"
         placeholder="e.g. emily@youremail.com"
         error={errors.workEmail?.message}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {          
+          setValue('workEmail', e.target.value === '' ? undefined : e.target.value);
+        }}
       />
 
       {/* Website */}

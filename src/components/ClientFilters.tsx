@@ -18,11 +18,23 @@ const FILTERS = [
 
 type FilterKey = typeof FILTERS[number];
 
+const FILTER_OPTIONS: Record<FilterKey, string[]> = {
+  Gender: ['Female', 'Male', 'Non-Binary', 'Transgender'],
+  Insurance: ['Aetna', 'Cigna', 'Blue Cross', 'Medicare', 'Medicaid'],
+  Remote: ['Yes'],
+  Degree: ['LMFT', 'LCSW', 'PsyD', 'PhD'],
+  Age: ['Children', 'Teens', 'Adults', 'Elders'],
+  Condition: ['Anxiety', 'Depression', 'PTSD', 'ADHD', 'Grief'],
+  Price: ['< $100', '$100–150', '$150+'],
+  Faith: ['Christian', 'Jewish', 'Spiritual', 'Muslim'],
+  Language: ['English', 'Spanish', 'Tagalog', 'Arabic'],
+  'Type of Therapy': ['cbt', 'dbt', 'emdr', 'psychodynamic', 'humanistic']
+};
+
 export default function ClientFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Initialize state from URL params
   const [zip, setZip] = useState(searchParams.get('zip') || '');
   const [filters, setFilters] = useState<Record<FilterKey, string>>(
     () =>
@@ -32,7 +44,6 @@ export default function ClientFilters() {
       }, {} as Record<FilterKey, string>)
   );
 
-  // Keep state in sync on back/forward navigation
   useEffect(() => {
     setZip(searchParams.get('zip') || '');
     setFilters(
@@ -43,12 +54,32 @@ export default function ClientFilters() {
     );
   }, [searchParams]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    const specialty = filters['Type of Therapy'];
+    const trimmedZip = zip.trim();
+
+    if (specialty && trimmedZip) {
+      try {
+        const res = await fetch(`/api/resolve-zip?zip=${trimmedZip}`);
+        if (res.ok) {
+          const loc = await res.json();
+          const path = `/therapists/by/${specialty}/${loc.citySlug}${
+            loc.neighborhoodSlug ? `/${loc.neighborhoodSlug}` : ''
+          }`;
+          router.push(path);
+          return;
+        }
+      } catch (err) {
+        console.error('ZIP resolution failed:', err);
+      }
+    }
+
+    // fallback to query string
     const params = new URLSearchParams();
-    if (zip.trim()) params.set('zip', zip.trim());
+    if (trimmedZip) params.set('zip', trimmedZip);
     FILTERS.forEach((key) => {
       const value = filters[key];
-      if (value && value !== key) params.set(key.toLowerCase(), value);
+      if (value) params.set(key.toLowerCase(), value);
     });
     router.push(`/therapists?${params.toString()}`);
   };
@@ -77,7 +108,8 @@ export default function ClientFilters() {
       <div className="flex flex-wrap justify-center gap-3">
         {FILTERS.map((label) => {
           const value = filters[label];
-          const isSelected = Boolean(value && value !== '');
+          const isSelected = Boolean(value);
+          const options = FILTER_OPTIONS[label];
           return (
             <select
               key={label}
@@ -93,9 +125,9 @@ export default function ClientFilters() {
               }
             >
               <option value="">{label}</option>
-              <option value="option1">{label} Option 1</option>
-              <option value="option2">{label} Option 2</option>
-              <option value="option3">{label} Option 3</option>
+              {options.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
             </select>
           );
         })}

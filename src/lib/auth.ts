@@ -1,6 +1,7 @@
 // src/lib/auth.ts
 
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import crypto from "crypto";
 import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { prisma } from "./prisma"
@@ -12,7 +13,7 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
 
   session: {
-    strategy: "jwt", // 👈 this must be database for PrismaAdapter
+    strategy: "jwt", // 👈 Changed from "database" to "jwt"
   },
 
   pages: {
@@ -28,19 +29,25 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("📧 authorize: Received credentials email:", credentials?.email);
         if (!credentials?.email || !credentials.password) {
           throw new Error("Missing email or password")
         }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-        })
+        });
+
+        console.log("👤 authorize: User found in database:", !!user);
 
         if (!user) {
           throw new Error("No user found with that email")
         }
 
-        const isValid = await compare(credentials.password, user.password)
+        const isValid = await compare(credentials.password, user.password);
+
+        console.log("🔑 authorize: Password comparison result:", isValid);
+
         if (!isValid) {
           throw new Error("Invalid password")
         }
@@ -52,7 +59,14 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user }) {
+      async jwt({ token, user }) {
+        if (user) {
+          token.id = user.id
+        }
+        return token
+      },
+
+    async signIn({ user, account, profile, email, credentials }) {
       if (!user?.id) return false
 
       try {
@@ -73,6 +87,18 @@ export const authOptions: NextAuthOptions = {
             },
           })
         }
+        // The following code was intended to explicitly create a session in the database
+        // for the "database" strategy. However, we are now using the "jwt" strategy,
+        // and this code is causing an error. We are commenting it out for now.
+        // if (account?.provider === 'credentials') { // Only do this for credentials provider
+        //   const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Example: session expires in 30 days
+        //   await prisma.session.create({
+        //     data: {
+        //       userId: user.id,
+        //       expires: expires,
+        //       sessionToken: crypto.randomUUID(), // Generate a unique session token
+        //     },
+        //   }); // remove the extra closing brace
       } catch (err) {
         console.error('❌ Error in signIn callback:', err)
         return false
@@ -80,14 +106,6 @@ export const authOptions: NextAuthOptions = {
 
       return true
     },
-
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-      }
-      return token
-    },
-
     async session({ session, token }) {
       if (token?.id) {
         session.user = {

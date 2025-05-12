@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { authOptions } from '@/lib/auth' // adjust path to your actual auth config
+import { authOptions } from '@/lib/auth'
+import BrowseByState from '@/components/home/BrowseByState'
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions)
@@ -16,7 +17,6 @@ export default async function HomePage() {
         <h1 className="text-2xl md:text-3xl font-semibold text-center text-[#1a2d3e] mb-8">
           Find a mental health professional
         </h1>
-
         <form
           action="/therapists"
           method="GET"
@@ -70,7 +70,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {[
             'Los Angeles', 'New York', 'San Diego',
-            'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd', 'dfdfd'
+            'Chicago', 'Houston', 'Miami', 'Phoenix', 'Seattle', 'Denver', 'Atlanta'
           ].map((city, idx) => (
             <div
               key={idx}
@@ -88,6 +88,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Browse by State */}
+      <BrowseByState />
 
       {/* Footer */}
       <footer className="bg-white border-t py-12 px-6 mt-12">

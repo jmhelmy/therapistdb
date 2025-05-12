@@ -17,14 +17,14 @@ const monthOptions = [
   ...[
     'January','February','March','April','May','June',
     'July','August','September','October','November','December',
-  ].map((m,i) => ({ label: m, value: String(i+1) })),
+  ].map((m,i) => ({ label: m, value: i+1 })),
 ]
 
 const yearOptions = [
   { label: '- Select Year -', value: '' },
   ...Array.from({ length: 20 }, (_, i) => {
     const y = new Date().getFullYear() + i
-    return { label: String(y), value: String(y) }
+    return { label: String(y), value: y }
   }),
 ]
 
@@ -50,7 +50,7 @@ export default function QualificationsForm() {
     schoolName?: string
     degree?: string
     graduationYear?: string
-    yearsInPractice?: number
+    yearsInPractice?: string
   }>()
 
   return (
@@ -93,12 +93,24 @@ export default function QualificationsForm() {
         <SelectDropdown
           name="licenseExpirationMonth"
           register={register}
+          valueAsNumber
           label="Expiration Month (optional)"
           options={monthOptions}
           error={errors.licenseExpirationMonth?.message}
         />
         <SelectDropdown
           name="licenseExpirationYear"
+          valueAsNumber
+          format={(value) => {
+            if (value === '') {
+              return null
+            }
+            const numValue = Number(value)
+            if(isNaN(numValue)) {
+              return value
+            }
+            return numValue
+          }}
           register={register}
           label="Expiration Year (optional)"
           options={yearOptions}
@@ -124,6 +136,16 @@ export default function QualificationsForm() {
 
       <TextField
         name="graduationYear"
+        format={(value) => {
+          if (value === '') {
+            return null
+          }
+          const numValue = Number(value)
+          if(isNaN(numValue)) {
+            return value
+          }
+          return numValue
+        }}
         register={register}
         label="Year Graduated (optional)"
         placeholder="e.g. 2018"
@@ -132,6 +154,16 @@ export default function QualificationsForm() {
 
       <TextField
         name="yearsInPractice"
+        format={(value) => {
+          if (value === '') {
+            return null
+          }
+          const numValue = Number(value)
+          if(isNaN(numValue)) {
+            return value
+          }
+          return numValue
+        }}
         register={register}
         label="Years in Practice (optional)"
         placeholder="e.g. 5"

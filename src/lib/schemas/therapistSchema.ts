@@ -6,7 +6,7 @@ export const basicsSchema = z.object({
   primaryCredential: z.string().optional(),
   primaryCredentialAlt: z.string().optional(),
   phone: z.string().optional(),
-  workEmail: z.string().email("Invalid email").optional(),
+  workEmail: z.string().optional(),
   website: z.string().url("Invalid URL").optional(),
   imageUrl: z.string().url().optional(),
 })
@@ -55,12 +55,12 @@ export const qualificationsSchema = z.object({
   primaryCredential: z.string().optional(),
   licenseNumber: z.string().optional(),
   licenseState: z.string().optional(),
-  licenseExpirationMonth: z.string().optional(),
-  licenseExpirationYear: z.string().optional(),
+  licenseExpirationMonth: z.number().nullable().optional(),
+  licenseExpirationYear: z.number().nullable().optional(),
   schoolName: z.string().optional(),
   degree: z.string().optional(),
-  graduationYear: z.string().optional(),
-  yearsInPractice: z.string().optional(),
+  graduationYear: z.number().nullable().optional(),
+  yearsInPractice: z.number().nullable().optional(),
 })
 export type QualificationsFormValues = z.infer<typeof qualificationsSchema>
 

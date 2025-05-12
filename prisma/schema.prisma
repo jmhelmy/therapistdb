@@ -90,3 +90,15 @@ model Therapist {
   treatmentStyle            String[]  @default([])
   treatmentStyleDescription String?
 }
+
+model BlogPost {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  content        String   // HTML or markdown
+  metaTitle      String?
+  metaDescription String?
+  published      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

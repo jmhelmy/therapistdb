@@ -3,6 +3,8 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { locations } from '@/data/locations'
+
 
 export default function AccountPage() {
   const { data: session } = useSession()
