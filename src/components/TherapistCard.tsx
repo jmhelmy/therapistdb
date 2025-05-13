@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 
 type Props = {
   therapist: {
@@ -26,6 +27,8 @@ type Props = {
 }
 
 export default function TherapistCard({ therapist: t }: { therapist: Props['therapist'] }) {
+  const [imageSrc, setImageSrc] = useState(t.imageUrl || '/default-avatar.png')
+
   return (
     <Link
       href={`/therapists/${t.slug}`}
@@ -35,12 +38,13 @@ export default function TherapistCard({ therapist: t }: { therapist: Props['ther
         {/* Avatar */}
         <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-300 flex-shrink-0">
           <Image
-            src={t.imageUrl || '/default-avatar.png'}
+            src={imageSrc}
             alt={`${t.name} avatar`}
             width={64}
             height={64}
             className="object-cover w-full h-full"
             loading="lazy"
+            onError={() => setImageSrc('/default-avatar.png')}
           />
         </div>
         {/* Info */}
@@ -50,9 +54,7 @@ export default function TherapistCard({ therapist: t }: { therapist: Props['ther
             {t.primaryCredential}
             {t.primaryCredentialAlt && `, ${t.primaryCredentialAlt}`}
           </p>
-          {t.tagline && (
-            <p className="text-sm text-gray-800 mb-2">{t.tagline}</p>
-          )}
+          {t.tagline && <p className="text-sm text-gray-800 mb-2">{t.tagline}</p>}
           <div className="text-sm text-gray-700 space-y-1 mb-2">
             <p><strong>Individual Fee:</strong> {t.feeIndividual || 'N/A'}</p>
             <p><strong>Couples Fee:</strong> {t.feeCouples || 'N/A'}</p>

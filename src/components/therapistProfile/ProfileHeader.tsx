@@ -1,9 +1,13 @@
-// src/components/therapistProfile/ProfileHeader.tsx
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function ProfileHeader({ therapist }: { therapist: any }) {
   const hasClaimed = Boolean(therapist.userId)
+  const [imageSrc, setImageSrc] = useState(therapist.imageUrl || '/default-avatar.png')
+
   return (
     <div className="relative text-center border border-gray-100 shadow-sm rounded-lg bg-white overflow-hidden">
       <div
@@ -20,11 +24,12 @@ export default function ProfileHeader({ therapist }: { therapist: any }) {
       <div className="relative -mt-12">
         <div className="w-28 h-28 rounded-full mx-auto border-4 border-white bg-white overflow-hidden">
           <Image
-            src={therapist.imageUrl || '/default-avatar.png'}
-            alt={`${therapist.name} avatar`}
+            src={imageSrc}
+            alt={`${therapist.name || 'Therapist'} avatar`}
             width={112}
             height={112}
             className="object-cover"
+            onError={() => setImageSrc('/default-avatar.png')}
           />
         </div>
       </div>
@@ -37,11 +42,12 @@ export default function ProfileHeader({ therapist }: { therapist: any }) {
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-500">{[therapist.primaryCredential, therapist.primaryCredentialAlt].filter(Boolean).join(', ')}</p>
+        <p className="text-sm text-gray-500">
+          {[therapist.primaryCredential, therapist.primaryCredentialAlt].filter(Boolean).join(', ')}
+        </p>
         {therapist.tagline && (
           <p className="text-sm text-gray-700 mt-1 max-w-md mx-auto">{therapist.tagline}</p>
         )}
-
         <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
           {therapist.phone && (
             <a
