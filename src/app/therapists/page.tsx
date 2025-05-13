@@ -13,11 +13,11 @@ const PAGE_SIZE = 10;
 export async function generateMetadata({ searchParams }: any): Promise<Metadata> {
   const zip = typeof searchParams.zip === 'string' ? searchParams.zip : undefined;
   const title = zip
-    ? `Therapists near ${zip} | TherapistDB`
-    : 'Find a Therapist | TherapistDB';
+    ? `Find Licensed Therapists Near ${zip} | TherapistDB`
+    : 'Your Trusted Directory for Mental Health Support | TherapistDB';
   const description = zip
-    ? `Browse licensed mental-health professionals near zip code ${zip}.`
-    : 'Browse licensed therapists and counselors to find the right mental-health support for you.';
+    ? `Browse licensed, verified therapists in ${zip}. In-person or online sessions available near you.`
+    : 'Connect with licensed therapists, counselors, and psychologists for in-person or online sessions.';
   const urlBase = 'https://yourdomain.com/therapists';
 
   return {
@@ -56,7 +56,7 @@ export default async function TherapistsPage({ searchParams }: any) {
     take: PAGE_SIZE
   });
 
-  // JSON-LD for SEO: list of therapist URLs
+  // JSON-LD for therapist list
   const ldJson = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -67,29 +67,65 @@ export default async function TherapistsPage({ searchParams }: any) {
     }))
   };
 
+  // JSON-LD for FAQs
+  const faqJson = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'How do I find a licensed therapist near me?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Use our location filter to search by zip code and specialty—then browse therapist profiles with verified credentials.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I book online therapy through TherapistDB?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes—many of our listed clinicians offer secure telehealth sessions via video or phone.'
+        }
+      }
+    ]
+  };
+
   return (
     <>
-      {/* JSON-LD structured data */}
+      {/* Structured data for list and FAQs */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJson) }}
+      />
 
       <main className="bg-[#F9FAF9] min-h-screen px-4 py-12 font-sans">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Page Title */}
-          <h1 className="text-3xl font-semibold text-gray-800 text-center">
+          {/* Hero Title & Intro */}
+          <h1 className="text-4xl font-bold text-center text-gray-800">
             {zip
-              ? `Therapists near ${zip}`
-              : 'Find a Mental Health Professional'}
+              ? `Find Licensed Therapists Near ${zip}`
+              : 'Your Trusted Directory for Mental Health Support'}
           </h1>
+          <p className="text-lg text-center text-gray-700 max-w-3xl mx-auto mt-4">
+            Whether you’re managing anxiety, healing from trauma, or just need someone to talk to,
+            TherapistDB connects you with licensed, verified mental health professionals ready to help.
+          </p>
+          <p className="text-md text-center text-gray-600 max-w-2xl mx-auto">
+            Browse psychologists, clinical social workers, marriage and family therapists, and more—offering both in-person and online sessions.
+          </p>
 
-          {/* Search / Filter */}
+          {/* Filters */}
           <ClientFilters />
 
           {/* Results Count */}
-          <div className="text-gray-600">
-            {total.toLocaleString()} Results
+          <div className="text-gray-600 text-center">
+            Showing {total.toLocaleString()} result{total !== 1 && 's'}
+            {zip && ` near ${zip}`}
           </div>
 
           {/* Therapist Cards */}
@@ -103,7 +139,7 @@ export default async function TherapistsPage({ searchParams }: any) {
 
           {/* Pagination */}
           <nav
-            className="flex items-center justify-center space-x-2"
+            className="flex items-center justify-center space-x-2 mt-8"
             aria-label="Pagination"
           >
             <Link
@@ -113,6 +149,7 @@ export default async function TherapistsPage({ searchParams }: any) {
                   ? 'text-gray-400 pointer-events-none'
                   : 'text-gray-700 hover:bg-gray-200'
               }`}
+              rel="prev"
             >
               ←
             </Link>
@@ -136,6 +173,7 @@ export default async function TherapistsPage({ searchParams }: any) {
                   ? 'text-gray-400 pointer-events-none'
                   : 'text-gray-700 hover:bg-gray-200'
               }`}
+              rel="next"
             >
               →
             </Link>

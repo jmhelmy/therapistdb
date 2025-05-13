@@ -1,40 +1,46 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Header() {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { data: session, status } = useSession()
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
 
   const navLinkClass = (href: string) => {
     const isActive =
       pathname === href ||
       (href === '/therapists' && pathname.startsWith('/therapists')) ||
       (href === '/blog' && pathname.startsWith('/blog')) ||
-      (href === '/for-therapists' && pathname.startsWith('/for-therapists'))
+      (href === '/for-therapists' && pathname.startsWith('/for-therapists')) ||
+      (href === '/worksheets' && pathname.startsWith('/worksheets')) ||
+      (href === '/about-us' && pathname.startsWith('/about-us'));
+
     return `relative transition-all duration-300 ease-in-out text-[16px] ${
       isActive ? 'text-[#006266] font-semibold' : 'text-[#425F80] font-medium'
-    } hover:text-[#006266]`
-  }
+    } hover:text-[#006266]`;
+  };
 
   const underline = (href: string) => {
     const isActive =
       pathname === href ||
       (href === '/therapists' && pathname.startsWith('/therapists')) ||
       (href === '/blog' && pathname.startsWith('/blog')) ||
-      (href === '/for-therapists' && pathname.startsWith('/for-therapists'))
+      (href === '/for-therapists' && pathname.startsWith('/for-therapists')) ||
+      (href === '/worksheets' && pathname.startsWith('/worksheets')) ||
+      (href === '/about-us' && pathname.startsWith('/about-us'));
+
     return (
       <span
         className={`absolute left-0 w-full h-[4px] bg-[#FFCD93] rounded-sm transition-all duration-300 ${
           isActive ? 'bottom-[-24px] opacity-100' : 'bottom-[-24px] opacity-0'
         }`}
       />
-    )
-  }
+    );
+  };
 
   return (
     <header className="bg-white px-6 py-6">
@@ -47,13 +53,6 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex space-x-12 items-center text-sm">
-            <div className="relative">
-              <Link href="/about-us" className={navLinkClass('/about-us')}>
-                About us
-                {underline('/about-us')}
-              </Link>
-            </div>
-
             <div className="relative group">
               <Link href="/therapists" className={navLinkClass('/therapists')}>
                 Find help
@@ -80,9 +79,23 @@ export default function Header() {
             </div>
 
             <div className="relative">
+              <Link href="/worksheets" className={navLinkClass('/worksheets')}>
+                Worksheets
+                {underline('/worksheets')}
+              </Link>
+            </div>
+
+            <div className="relative">
               <Link href="/blog" className={navLinkClass('/blog')}>
                 Blog
                 {underline('/blog')}
+              </Link>
+            </div>
+
+            <div className="relative">
+              <Link href="/about-us" className={navLinkClass('/about-us')}>
+                About us
+                {underline('/about-us')}
               </Link>
             </div>
           </nav>
@@ -137,17 +150,20 @@ export default function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <nav className="md:hidden mt-4 space-y-2 px-6">
-          <Link href="/about-us" className="block text-[#425F80] hover:text-[#006266]">
-            About us
-          </Link>
           <Link href="/therapists" className="block text-[#425F80] hover:text-[#006266]">
             Find help
           </Link>
           <Link href="/for-therapists" className="block text-[#425F80] hover:text-[#006266]">
             For therapists
           </Link>
+          <Link href="/worksheets" className="block text-[#425F80] hover:text-[#006266]">
+            Therapy Worksheets
+          </Link>
           <Link href="/blog" className="block text-[#425F80] hover:text-[#006266]">
             Blog
+          </Link>
+          <Link href="/about-us" className="block text-[#425F80] hover:text-[#006266]">
+            About us
           </Link>
           {session ? (
             <>
@@ -177,5 +193,5 @@ export default function Header() {
         </nav>
       )}
     </header>
-);
+  );
 }

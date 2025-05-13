@@ -1,0 +1,28 @@
+[
+    {
+      "id": "cbt",
+      "title": "CBT Worksheet",
+      "image": "cbt.png",
+      "description": "Challenge negative thoughts using cognitive behavioral techniques."
+    },
+    {
+      "id": "anxiety",
+      "title": "Anxiety Tracker",
+      "image": "anxiety.png",
+      "description": "Track triggers and responses to better understand your anxiety."
+    },
+    {
+      "id": "esteem",
+      "title": "Self-Esteem Builder",
+      "image": "esteem.png",
+      "description": "Identify your strengths and build a more positive self-image."
+    },
+    {
+        "id": "mind-balance-checkin",
+        "title": "Mind Balance Check-In",
+        "image": "mind-balance-checkin.png",
+        "description": "A guided check-in to help users recognize the tug-of-war between emotion and logic, and find clarity through inner balance."
+      }
+      
+  ]
+  
