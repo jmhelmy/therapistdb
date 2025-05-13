@@ -1,6 +1,5 @@
-'use client'
-
-import Link from 'next/link'
+'use client';
+import Link from 'next/link';
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -49,9 +48,9 @@ export default function Header() {
 
           <nav className="hidden md:flex space-x-12 items-center text-sm">
             <div className="relative">
-              <Link href="/about" className={navLinkClass('/about')}>
+              <Link href="/about-us" className={navLinkClass('/about-us')}>
                 About us
-                {underline('/about')}
+                {underline('/about-us')}
               </Link>
             </div>
 
@@ -138,7 +137,7 @@ export default function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <nav className="md:hidden mt-4 space-y-2 px-6">
-          <Link href="/about" className="block text-[#425F80] hover:text-[#006266]">
+          <Link href="/about-us" className="block text-[#425F80] hover:text-[#006266]">
             About us
           </Link>
           <Link href="/therapists" className="block text-[#425F80] hover:text-[#006266]">
@@ -178,5 +177,5 @@ export default function Header() {
         </nav>
       )}
     </header>
-)
+);
 }
