@@ -2,6 +2,9 @@ import { getSpecialtyBySlug, getLocationData } from '@/lib/data'
 import TherapistCard from '@/components/TherapistCard'
 import { notFound } from 'next/navigation'
 
+import { specialties } from '@/data/specialties'
+import { locations } from '@/data/locations'
+
 type Props = {
   params: {
     specialty: string
@@ -33,8 +36,7 @@ export default async function SEOPage({ params }: Props) {
 
   if (!specialtyData || !locationData) return notFound()
 
-  // Placeholder for therapists while getTherapists is unavailable
-  const therapists = [] // <- replace with real data later
+  const therapists = [] // placeholder
 
   return (
     <div className="p-6">
@@ -54,4 +56,29 @@ export default async function SEOPage({ params }: Props) {
       )}
     </div>
   )
+}
+
+export async function generateStaticParams() {
+  const params = []
+
+  for (const specialty of specialties) {
+    for (const location of locations) {
+      const zips = Array.isArray(location.zipCodes) ? location.zipCodes : []
+
+      for (const zip of zips) {
+        params.push({
+          specialty: specialty.slug,
+          location: [location.citySlug, zip]
+        })
+      }
+
+      // Broader route without zip
+      params.push({
+        specialty: specialty.slug,
+        location: [location.citySlug]
+      })
+    }
+  }
+
+  return params
 }
