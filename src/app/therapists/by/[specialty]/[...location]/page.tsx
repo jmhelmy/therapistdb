@@ -1,7 +1,6 @@
-import { getSpecialtyBySlug, getLocationData, getTherapists } from '@/lib/data'
+import { getSpecialtyBySlug, getLocationData } from '@/lib/data'
 import TherapistCard from '@/components/TherapistCard'
 import { notFound } from 'next/navigation'
-import Head from 'next/head'
 
 type Props = {
   params: {
@@ -34,10 +33,8 @@ export default async function SEOPage({ params }: Props) {
 
   if (!specialtyData || !locationData) return notFound()
 
-  const therapists = await getTherapists({
-    specialty: specialtyData.id,
-    locationId: locationData.id
-  })
+  // Placeholder for therapists while getTherapists is unavailable
+  const therapists = [] // <- replace with real data later
 
   return (
     <div className="p-6">
