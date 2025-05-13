@@ -13,7 +13,7 @@ export async function generateStaticParams() {
   }> = []
 
   for (const loc of locations) {
-    // 1) push neighborhood‐only
+    // 1) push neighborhood-only
     paramsList.push({
       country: loc.countrySlug,
       state:   loc.stateSlug,
@@ -22,16 +22,18 @@ export async function generateStaticParams() {
       neighborhood: loc.neighborhoodSlug
     })
 
-    // 2) push each zip individually (if you want zip pages)
-    for (const zip of loc.zips) {
-      paramsList.push({
-        country: loc.countrySlug,
-        state:   loc.stateSlug,
-        county:  loc.countySlug,
-        city:    loc.citySlug,
-        neighborhood: loc.neighborhoodSlug,
-        zips: [zip]
-      })
+    // 2) push each zip individually, if zip list exists and is valid
+    if (Array.isArray(loc.zips)) {
+      for (const zip of loc.zips) {
+        paramsList.push({
+          country: loc.countrySlug,
+          state:   loc.stateSlug,
+          county:  loc.countySlug,
+          city:    loc.citySlug,
+          neighborhood: loc.neighborhoodSlug,
+          zips: [zip]
+        })
+      }
     }
   }
 
