@@ -72,19 +72,15 @@ export default async function TherapistsPage({ searchParams }: any) {
     take: PAGE_SIZE,
   });
 
-  // AI RANKING via API
+  // AI RANKING via API (fixed for Vercel)
   let reasonMap = new Map<string, string>();
   if (issue && therapists.length > 0) {
     try {
-      const apiUrl =
-        process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('localhost')
-          ? `https://${process.env.VERCEL_URL}`
-          : 'http://localhost:3000';
-
-      const res = await fetch(`${apiUrl}/api/rank-therapists`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/rank-therapists`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ issue, therapists }),
+        cache: 'no-store',
       });
 
       const { ranked } = await res.json();
@@ -111,7 +107,6 @@ export default async function TherapistsPage({ searchParams }: any) {
         </p>
 
         <ClientFilters />
-
         <IssueForm zip={zip} page={page} />
 
         <div className="text-gray-600 text-center">
