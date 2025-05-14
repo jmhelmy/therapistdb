@@ -4,12 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, FormEvent, useEffect } from 'react';
 
 export default function IssueForm({ zip, page }: { zip?: string; page: number }) {
-  const router = useRouter();
-  const params = useSearchParams();
-  const [issue, setIssue] = useState<string>(params.get('issue') || '');
+  const searchParams = useSearchParams();
+  const [issue, setIssue] = useState<string>(searchParams.get('issue') || '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Reset loading state after 30s in case something goes wrong
   useEffect(() => {
     if (isLoading) {
       const timeout = setTimeout(() => setIsLoading(false), 30000);
@@ -27,9 +25,9 @@ export default function IssueForm({ zip, page }: { zip?: string; page: number })
     if (issue) qs.set('issue', issue);
 
     const url = `/therapists?${qs.toString()}`;
-    router.push(url);
-    // Force a full refresh so the server component re-runs
-    router.refresh();
+
+    // Force full server-side reload
+    window.location.href = url;
   };
 
   return (

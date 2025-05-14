@@ -5,9 +5,8 @@ import { notFound } from 'next/navigation';
 import ClientFilters from '@/components/ClientFilters';
 import TherapistCard from '@/components/TherapistCard';
 import Pagination from '@/components/Pagination';
-import ZipSearchForm from '@/components/ZipSearchForm';
+import IssueForm from '@/components/IssueForm';
 import { prisma } from '@/lib/prisma';
-import { OpenAI } from 'openai';
 
 const PAGE_SIZE = 10;
 
@@ -41,7 +40,6 @@ export default async function TherapistsPage({ searchParams }: any) {
   const page = parseInt((searchParams.page as string) || '1', 10);
   const issue = typeof searchParams.issue === 'string' ? searchParams.issue : undefined;
 
-  // Build filter
   const where: any = { published: true };
   if (zip) where.seoZip1 = zip;
   if (searchParams.insurance) where.insuranceAccepted = searchParams.insurance;
@@ -74,51 +72,28 @@ export default async function TherapistsPage({ searchParams }: any) {
     take: PAGE_SIZE,
   });
 
-  // Optional AI ranking
+  // AI RANKING via API
   let reasonMap = new Map<string, string>();
-  if (issue) {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-    const listBlock = therapists
-      .map(t => `
-ID: ${t.id}
-Name: ${t.name}
-Specialties: ${(t.issues || []).join(', ')}
-Languages: ${(t.languages || []).join(', ')}
-Insurance: ${t.insuranceAccepted || 'N/A'}
-Fees: ${t.feeIndividual || 'N/A'}
-Location: ${[t.primaryCity, t.primaryState, t.primaryZip].filter(Boolean).join(', ')}
-Modalities: ${(t.treatmentStyle || []).join(', ')}
-`.trim())
-      .join('\n\n');
-
-    const prompt = `
-You are an assistant matching a user with a therapist based on this user issue:
-"${issue}"
-
-Below are full profiles of the candidate therapists. Rank them from best fit to least, and for each therapist give a one-sentence reason why they’re a good (or poor) match.
-
-${listBlock}
-
-Respond only with a JSON array of objects like:
-[
-  { "id": "therapist-id-1", "reason": "They specialize in X and offer sliding-scale." },
-  { "id": "therapist-id-2", "reason": "…" }
-]
-`.trim();
-
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [{ role: 'user', content: prompt }],
-    });
-
+  if (issue && therapists.length > 0) {
     try {
-      const ranked = JSON.parse(res.choices[0].message.content) as { id: string; reason: string }[];
-      reasonMap = new Map(ranked.map(r => [r.id, r.reason]));
+      const apiUrl =
+        process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('localhost')
+          ? `https://${process.env.VERCEL_URL}`
+          : 'http://localhost:3000';
+
+      const res = await fetch(`${apiUrl}/api/rank-therapists`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issue, therapists }),
+      });
+
+      const { ranked } = await res.json();
+      reasonMap = new Map(ranked.map((r: any) => [r.id, r.reason]));
       therapists = ranked
-        .map(r => therapists.find(t => t.id === r.id))
-        .filter((t): t is typeof therapists[number] => Boolean(t));
-    } catch {
-      console.warn('Could not parse ranking:', res.choices[0].message.content);
+        .map((r: any) => therapists.find((t: any) => t.id === r.id))
+        .filter((t: any): t is typeof therapists[number] => Boolean(t));
+    } catch (err) {
+      console.error('Failed to fetch AI ranking:', err);
     }
   }
 
@@ -135,27 +110,9 @@ Respond only with a JSON array of objects like:
           TherapistDB connects you with licensed, verified mental health professionals ready to help.
         </p>
 
-        {/* ZIP search pulled into its own component */}
-        <ZipSearchForm />
-
-        {/* other filters */}
         <ClientFilters />
 
-        {/* issue textarea stays here for AI ranking */}
-        <form method="get" className="mt-6 mb-4">
-          <textarea
-            name="issue"
-            defaultValue={issue}
-            rows={4}
-            placeholder="Describe your issue here (e.g., anxiety, relationship struggles)..."
-            className="w-full p-4 border border-gray-300 rounded-lg"
-          />
-          {zip && <input type="hidden" name="zip" value={zip} />}
-          <input type="hidden" name="page" value={page} />
-          <button type="submit" className="mt-2 px-4 py-2 bg-teal-600 text-white rounded-lg">
-            Search by Issue
-          </button>
-        </form>
+        <IssueForm zip={zip} page={page} />
 
         <div className="text-gray-600 text-center">
           Showing {total.toLocaleString()} result{total !== 1 && 's'}
