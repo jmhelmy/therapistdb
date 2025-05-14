@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // 3) allow external images from goodtherapy.org
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "www.goodtherapy.org",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
