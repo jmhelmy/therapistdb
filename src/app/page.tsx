@@ -79,7 +79,7 @@ export default async function HomePage() {
       <section className="bg-gradient-to-br from-teal-50 via-sky-50 to-indigo-50 py-20 md:py-28 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-teal-700 mb-6 leading-tight">
-            Find Your Path to Mental Wellness
+            Find a Therapist
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
             TherapistDB connects you with qualified and compassionate mental health professionals. Start your journey to a healthier mind today.

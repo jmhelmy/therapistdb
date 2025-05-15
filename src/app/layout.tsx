@@ -2,12 +2,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-// REMOVE these direct imports if ConditionalLayoutWrapper handles them:
-// import ConditionalHeader from '@/components/ConditionalHeader'; // OLD one, if you're replacing its logic
-// import Footer from '@/components/shared/Footer';
-import Providers from './providers'; // Keep this for NextAuth, etc.
-import Script from 'next/script';
-import ConditionalLayoutWrapper from '@/components/layout/ConditionalLayoutWrapper'; // IMPORT THE NEW WRAPPER
+import Providers from './providers';
+import ConditionalLayoutWrapper from '@/components/layout/ConditionalLayoutWrapper'; // Assuming path is correct
+import CloudinaryScriptLoader from '@/components/shared/CloudinaryScriptLoader'; // Import the new component
 
 const montserrat = Montserrat({
   weight: ['500', '600', '700'],
@@ -25,16 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${montserrat.variable} h-full`}>
       <head>
-        <Script
-          src="https://upload-widget.cloudinary.com/global/all.js"
-          strategy="beforeInteractive"
-        />
-        {/* Add any other head elements like favicons, etc. */}
+        {/* Cloudinary script is now loaded by CloudinaryScriptLoader inside Providers */}
       </head>
       <body className="flex flex-col min-h-screen font-sans bg-[#F9FAF9] antialiased">
-        <Providers> {/* Providers should wrap everything that needs its context */}
-          <ConditionalLayoutWrapper> {/* USE THE WRAPPER HERE */}
-            {children} {/* Page content will be rendered inside <main> within the wrapper */}
+        <Providers> {/* NextAuth Provider, etc. */}
+          <CloudinaryScriptLoader /> {/* Place the script loader here */}
+          <ConditionalLayoutWrapper>
+            {children}
           </ConditionalLayoutWrapper>
         </Providers>
       </body>
