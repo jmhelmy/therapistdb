@@ -1,79 +1,57 @@
+// src/components/therapistAccount/build-profile/PublishButton.tsx
 'use client'
 
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { FullTherapistProfile } from '@/lib/schemas/therapistSchema'; // Adjust path
 
-interface PublishButtonProps {
-  formData: {
-    id?: string
-    name?: string
-    published?: boolean
-    slug?: string
-  }
-  setFormData: (updater: (prev: any) => any) => void
-}
+export default function PublishButton() {
+  const [loading, setLoading] = useState(false);
+  const { watch, setValue, getValues } = useFormContext<FullTherapistProfile>();
 
-export default function PublishButton({
-  formData,
-  setFormData,
-}: PublishButtonProps) {
-  const [loading, setLoading] = useState(false)
-  const methods = useFormContext()
+  const therapistId = watch('id');
+  const therapistName = watch('name');
+  const isPublished = watch('published');
 
   const handlePublish = async () => {
-    if (!formData.id || !formData.name?.trim()) {
-      alert('Therapist must have an ID and a name before publishing.')
-      return
+    if (!therapistId || !therapistName?.trim()) {
+      alert('Therapist must have an ID and a name before publishing.');
+      return;
     }
-
-    setLoading(true)
-
+    setLoading(true);
     try {
-      const res = await fetch('/api/therapists/publish', {
+      const res = await fetch('/api/therapists/publish', { // Ensure this API exists
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: formData.id,
-          name: formData.name,
-        }),
-      })
-
-      const json = await res.json()
-
+        body: JSON.stringify({ id: therapistId, name: therapistName }),
+      });
+      const json = await res.json();
       if (!res.ok || !json.success) {
-        alert(`Publish failed: ${json.message || 'Unknown error'}`)
-        return
+        alert(`Publish failed: ${json.message || 'Unknown error'}`);
+        return;
       }
-
-      const updatedSlug = json.slug || formData.slug
-      console.log('✅ Published with slug:', updatedSlug)
-
-      // ✅ Update both react-hook-form and local formData
-      methods.setValue('published', true)
-      methods.setValue('slug', updatedSlug)
-
-      setFormData(prev => ({
-        ...prev,
-        published: true,
-        slug: updatedSlug,
-      }))
+      const updatedSlug = json.slug || getValues('slug'); // Use getValues for current slug if not returned
+      console.log('✅ Published with slug:', updatedSlug);
+      setValue('published', true, { shouldDirty: true, shouldValidate: true });
+      setValue('slug', updatedSlug, { shouldDirty: true, shouldValidate: true });
     } catch (err) {
-      console.error('❌ Publish error:', err)
-      alert('An error occurred while publishing.')
+      console.error('❌ Publish error:', err);
+      alert('An error occurred while publishing.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (formData.published) return null
+  if (isPublished) return null; // Or show "Published" status differently in BuildProfileHeader
 
   return (
     <button
+      type="button" // Important: prevent form submission if it's inside the main <form>
       onClick={handlePublish}
-      disabled={!formData.id || !formData.name?.trim() || loading}
+      disabled={!therapistId || !therapistName?.trim() || loading}
       className="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700 transition disabled:opacity-50"
     >
       {loading ? 'Publishing…' : 'Publish'}
     </button>
-  )
+  );
 }
