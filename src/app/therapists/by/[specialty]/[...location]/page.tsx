@@ -1,5 +1,5 @@
 import { getSpecialtyBySlug, getLocationData } from '@/lib/data'
-import TherapistCard from '@/components/therapistProfile/TherapistList/TherapistCard'
+import TherapistCard from '@/components/TherapistList/TherapistCard'
 import { notFound } from 'next/navigation'
 
 import { specialties } from '@/data/specialties'
