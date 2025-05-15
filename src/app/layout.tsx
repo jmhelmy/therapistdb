@@ -2,10 +2,12 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
-import ConditionalHeader from '@/components/ConditionalHeader';
-import Footer from '@/components/shared/Footer';
-import Providers from './providers';
+// REMOVE these direct imports if ConditionalLayoutWrapper handles them:
+// import ConditionalHeader from '@/components/ConditionalHeader'; // OLD one, if you're replacing its logic
+// import Footer from '@/components/shared/Footer';
+import Providers from './providers'; // Keep this for NextAuth, etc.
 import Script from 'next/script';
+import ConditionalLayoutWrapper from '@/components/layout/ConditionalLayoutWrapper'; // IMPORT THE NEW WRAPPER
 
 const montserrat = Montserrat({
   weight: ['500', '600', '700'],
@@ -22,7 +24,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${montserrat.variable} h-full`}>
-      {/* Ensure <head> immediately follows or is on the same line if preferred */}
       <head>
         <Script
           src="https://upload-widget.cloudinary.com/global/all.js"
@@ -30,14 +31,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         {/* Add any other head elements like favicons, etc. */}
       </head>
-      {/* Ensure <body> immediately follows </head> */}
       <body className="flex flex-col min-h-screen font-sans bg-[#F9FAF9] antialiased">
-        <Providers>
-          <ConditionalHeader />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
+        <Providers> {/* Providers should wrap everything that needs its context */}
+          <ConditionalLayoutWrapper> {/* USE THE WRAPPER HERE */}
+            {children} {/* Page content will be rendered inside <main> within the wrapper */}
+          </ConditionalLayoutWrapper>
         </Providers>
       </body>
     </html>

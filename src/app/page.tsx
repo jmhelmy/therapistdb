@@ -198,46 +198,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Footer - Your existing footer structure is good. I'll add some minor style tweaks. */}
-      <footer className="bg-gray-800 text-gray-300 border-t border-gray-700 py-16 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-semibold text-white mb-3 text-lg">Company</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/about-us" className="hover:text-teal-400 transition-colors">About Us</Link></li>
-              <li><Link href="/careers" className="hover:text-teal-400 transition-colors">Careers</Link></li>
-              <li><Link href="/press" className="hover:text-teal-400 transition-colors">Press</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-white mb-3 text-lg">Support</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/help" className="hover:text-teal-400 transition-colors">Help Center</Link></li>
-              <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact Us</Link></li>
-              <li><Link href="/privacy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-teal-400 transition-colors">Terms of Service</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-white mb-3 text-lg">For Therapists</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/for-therapists" className="hover:text-teal-400 transition-colors">List Your Practice</Link></li>
-              <li><Link href="/therapist-faq" className="hover:text-teal-400 transition-colors">Therapist FAQ</Link></li>
-              <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Professional Blog</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-white mb-3 text-lg">Connect</h4>
-            <p className="text-sm mb-2">Follow us on:</p>
-            <ul className="flex space-x-4">
-              <li><a href="https://facebook.com/therapistdb" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-teal-400 transition-colors">FB</a></li>
-              <li><a href="https://twitter.com/therapistdb" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="hover:text-teal-400 transition-colors">TW</a></li>
-              <li><a href="https://linkedin.com/company/therapistdb" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="hover:text-teal-400 transition-colors">IN</a></li>
-            </ul>
-             <p className="text-xs mt-6 text-gray-400">© {new Date().getFullYear()} TherapistDB. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
