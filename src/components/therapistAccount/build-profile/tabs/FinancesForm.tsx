@@ -28,7 +28,7 @@ export default function FinancesForm() {
     freeConsultation?: boolean
     feeComment?: string
     paymentMethods: string[]
-    insuranceAccepted?: string
+    // insuranceAccepted?: string
   }>()
 
   const paymentMethods = watch('paymentMethods') || []

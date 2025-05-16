@@ -18,7 +18,7 @@ export type TherapistDataForCard = {
   feeCouples?: string | null;
   slidingScale?: boolean | null;
   paymentMethods?: string[] | null;
-  insuranceAccepted?: string | null;
+  //insuranceAccepted?: string | null;
   primaryCity?: string | null;
   primaryState?: string | null;
   primaryZip?: string | null;

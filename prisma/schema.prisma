@@ -10,10 +10,12 @@ generator client {
 }
 
 enum Gender {
-  male
-  female
-  other
-  prefer_not_to_say
+  MALE
+  FEMALE
+  NON_BINARY        // Added
+  TRANSGENDER       // Added
+  OTHER
+  PREFER_NOT_TO_SAY
 }
 
 enum LicenseStatus {
@@ -29,21 +31,21 @@ model User {
   therapist Therapist?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt // MODIFIED
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Therapist {
-  id        String  @id @default(uuid())
-  userId    String? @unique
-  user      User?   @relation(fields: [userId], references: [id])
-  slug      String? @unique // MODIFIED: Made optional
-  published Boolean @default(false)
+  id                   String    @id @default(uuid())
+  userId               String?   @unique
+  user                 User?     @relation(fields: [userId], references: [id])
+  slug                 String?   @unique
+  published            Boolean   @default(false)
 
   // --- Basics from Zod ---
   name                 String?
   primaryCredential    String?
   primaryCredentialAlt String?
-  gender               Gender?
+  gender               Gender?   // Uses updated Gender enum
   phone                String?
   workEmail            String?
   website              String?
@@ -51,34 +53,34 @@ model Therapist {
   coverImageUrl        String?
 
   // --- Location from Zod ---
-  primaryAddress      String?
-  primaryCity         String?
-  primaryState        String?
-  primaryZip          String?
-  additionalAddress   String?
-  additionalCity      String?
-  additionalState     String?
-  additionalZip       String?
-  telehealth          Boolean?
-  inPerson            Boolean?
-  locationDescription String?  @db.Text
+  primaryAddress       String?
+  primaryCity          String?
+  primaryState         String?
+  primaryZip           String?
+  additionalAddress    String?
+  additionalCity       String?
+  additionalState      String?
+  additionalZip        String?
+  telehealth           Boolean?
+  inPerson             Boolean?
+  locationDescription  String?   @db.Text
 
   // --- SEO (from your previous schema) ---
-  seoZip1     String?
-  seoZip2     String?
-  seoZip3     String?
-  nearbyCity1 String?
-  nearbyCity2 String?
-  nearbyCity3 String?
+  seoZip1              String?
+  seoZip2              String?
+  seoZip3              String?
+  nearbyCity1          String?
+  nearbyCity2          String?
+  nearbyCity3          String?
 
   // --- Finances from Zod ---
-  feeIndividual     String?
-  feeCouples        String?
-  slidingScale      Boolean?
-  freeConsultation  Boolean?
-  feeComment        String?  @db.Text
-  paymentMethods    String[] @default([])
-  insuranceAccepted String?
+  feeIndividual        Int?      // MODIFIED: Changed from String? for proper price filtering
+  feeCouples           Int?      // MODIFIED: Changed from String?
+  slidingScale         Boolean?
+  freeConsultation     Boolean?
+  feeComment           String?   @db.Text
+  paymentMethods       String[]  @default([])
+  // insuranceAccepted    String[]  @default([]) // MODIFIED: Changed from String? to support multiple & 'has' query
 
   // --- Qualifications from Zod ---
   licenseStatus          LicenseStatus?
@@ -93,30 +95,30 @@ model Therapist {
   practiceStartYear      Int?
 
   // --- Personal Statement from Zod ---
-  tagline            String? @db.Text
-  personalStatement1 String? @db.Text
-  personalStatement2 String? @db.Text
-  personalStatement3 String? @db.Text
+  tagline              String?   @db.Text
+  personalStatement1   String?   @db.Text
+  personalStatement2   String?   @db.Text
+  personalStatement3   String?   @db.Text
 
   // --- Specialties from Zod ---
-  issues                String[] @default([])
-  topIssues             String[] @default([])
-  specialtyDescription  String?  @db.Text
-  mentalHealthInterests String[] @default([])
-  sexualityInterests    String[] @default([])
-  ages                  String[] @default([])
-  participants          String[] @default([])
-  communities           String[] @default([])
-  faithInterests        String[] @default([])
-  languages             String[] @default([])
+  issues                 String[]  @default([])
+  topIssues              String[]  @default([])
+  specialtyDescription   String?   @db.Text
+  mentalHealthInterests  String[]  @default([])
+  sexualityInterests     String[]  @default([])
+  ages                   String[]  @default([]) // Used by Age filter
+  participants           String[]  @default([])
+  communities            String[]  @default([]) // Used by Faith filter
+  faithInterests         String[]  @default([])
+  languages              String[]  @default([]) // Used by Language filter
 
   // --- Treatment Style from Zod ---
-  treatmentStyle            String[] @default([])
-  treatmentStyleDescription String?  @db.Text
+  treatmentStyle           String[]  @default([]) // Used by Type of Therapy filter
+  treatmentStyleDescription String?   @db.Text
 
   // Timestamps
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt // MODIFIED
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model BlogPost {
@@ -128,5 +130,5 @@ model BlogPost {
   metaDescription String?  @db.Text
   published       Boolean  @default(false)
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now()) @updatedAt // MODIFIED (added @default(now()) for safety)
+  updatedAt       DateTime @default(now()) @updatedAt
 }

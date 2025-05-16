@@ -24,7 +24,7 @@ interface TherapistDataForAI {
   name: string; 
   specialties?: string[] | null;
   languages?: string[] | null;
-  insuranceAccepted?: string | null;
+  // insuranceAccepted?: string | null;
   feeIndividual?: number | string | null; 
   city?: string | null;
   state?: string | null;
