@@ -9,96 +9,124 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Gender {
+  male
+  female
+  other
+  prefer_not_to_say
+}
+
+enum LicenseStatus {
+  licensed
+  pre_licensed
+  none
+}
+
 model User {
   id        String     @id @default(uuid())
   email     String     @unique
-  password  String
+  password  String // REMEMBER: Store HASHED passwords, not plaintext
   therapist Therapist?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt // MODIFIED
 }
 
 model Therapist {
-  id                        String    @id @default(uuid())
-  userId                    String?   @unique
-  user                      User?     @relation(fields: [userId], references: [id])
-  slug                      String?   @unique
-  imageUrl                  String?
-  published                 Boolean   @default(false)
+  id        String  @id @default(uuid())
+  userId    String? @unique
+  user      User?   @relation(fields: [userId], references: [id])
+  slug      String? @unique // MODIFIED: Made optional
+  published Boolean @default(false)
 
-  name                      String?
-  primaryCredential         String?
-  primaryCredentialAlt      String?
-  gender                    String?
-  phone                     String?
-  workEmail                 String?
-  website                   String?
+  // --- Basics from Zod ---
+  name                 String?
+  primaryCredential    String?
+  primaryCredentialAlt String?
+  gender               Gender?
+  phone                String?
+  workEmail            String?
+  website              String?
+  imageUrl             String?
+  coverImageUrl        String?
 
-  primaryAddress            String?
-  primaryCity               String?
-  primaryState              String?
-  primaryZip                String?
-  additionalAddress         String?
-  additionalCity            String?
-  additionalState           String?
-  additionalZip             String?
-  telehealth                Boolean   @default(false)
-  inPerson                  Boolean   @default(false)
-  locationDescription       String?
+  // --- Location from Zod ---
+  primaryAddress      String?
+  primaryCity         String?
+  primaryState        String?
+  primaryZip          String?
+  additionalAddress   String?
+  additionalCity      String?
+  additionalState     String?
+  additionalZip       String?
+  telehealth          Boolean?
+  inPerson            Boolean?
+  locationDescription String?  @db.Text
 
-  seoZip1                   String?
-  seoZip2                   String?
-  seoZip3                   String?
-  nearbyCity1               String?
-  nearbyCity2               String?
-  nearbyCity3               String?
+  // --- SEO (from your previous schema) ---
+  seoZip1     String?
+  seoZip2     String?
+  seoZip3     String?
+  nearbyCity1 String?
+  nearbyCity2 String?
+  nearbyCity3 String?
 
-  feeIndividual             String?
-  feeCouples                String?
-  slidingScale              Boolean   @default(false)
-  freeConsultation          Boolean   @default(false)
-  feeComment                String?
-  paymentMethods            String[]  @default([])
-  insuranceAccepted         String?
+  // --- Finances from Zod ---
+  feeIndividual     String?
+  feeCouples        String?
+  slidingScale      Boolean?
+  freeConsultation  Boolean?
+  feeComment        String?  @db.Text
+  paymentMethods    String[] @default([])
+  insuranceAccepted String?
 
-  licenseStatus             String?
-  profession                String?
-  licenseNumber             String?
-  licenseState              String?
-  licenseExpirationMonth    Int?
-  licenseExpirationYear     Int?
+  // --- Qualifications from Zod ---
+  licenseStatus          LicenseStatus?
+  profession             String?
+  licenseNumber          String?
+  licenseState           String?
+  licenseExpirationMonth Int?
+  licenseExpirationYear  Int?
+  educationSchool        String?
+  educationDegree        String?
+  educationYearGraduated Int?
+  practiceStartYear      Int?
 
-  educationSchool           String?
-  educationDegree           String?
-  educationYearGraduated    Int?
-  practiceStartYear         Int?
+  // --- Personal Statement from Zod ---
+  tagline            String? @db.Text
+  personalStatement1 String? @db.Text
+  personalStatement2 String? @db.Text
+  personalStatement3 String? @db.Text
 
-  tagline                   String?
+  // --- Specialties from Zod ---
+  issues                String[] @default([])
+  topIssues             String[] @default([])
+  specialtyDescription  String?  @db.Text
+  mentalHealthInterests String[] @default([])
+  sexualityInterests    String[] @default([])
+  ages                  String[] @default([])
+  participants          String[] @default([])
+  communities           String[] @default([])
+  faithInterests        String[] @default([])
+  languages             String[] @default([])
 
-  personalStatement1        String?
-  personalStatement2        String?
-  personalStatement3        String?
+  // --- Treatment Style from Zod ---
+  treatmentStyle            String[] @default([])
+  treatmentStyleDescription String?  @db.Text
 
-  issues                    String[]  @default([])
-  specialtyDescription      String?
-  mentalHealthRoles         String[]  @default([])
-  sexuality                 String?
-  ages                      String[]  @default([])
-  participants              String[]  @default([])
-  communities               String[]  @default([])
-  languages                 String[]  @default([])
-  topIssues                 String[]  @default([])
-
-  treatmentStyle            String[]  @default([])
-  treatmentStyleDescription String?
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt // MODIFIED
 }
 
 model BlogPost {
-  id             String   @id @default(cuid())
-  title          String
-  slug           String   @unique
-  content        String   // HTML or markdown
-  metaTitle      String?
-  metaDescription String?
-  published      Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  content         String   @db.Text
+  metaTitle       String?
+  metaDescription String?  @db.Text
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt // MODIFIED (added @default(now()) for safety)
 }

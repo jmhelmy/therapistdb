@@ -1,4 +1,4 @@
-// components/TherapistCard.tsx
+// components/TherapistList/TherapistCard.tsx
 'use client'
 
 import Image from 'next/image'

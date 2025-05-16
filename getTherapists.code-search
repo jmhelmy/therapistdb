@@ -1,0 +1,41 @@
+# Query: getTherapists
+# ContextLines: 1
+
+// src/app/therapists/by/[specialty]/[...location]/page.tsx
+import { getSpecialtyBySlug, getLocationData } from '@/lib/data'
+import TherapistCard from '@/components/TherapistCard'
+
+interface Params {
+  specialty: string
+  location: string[]
+}
+
+export default async function TherapistByLocationPage({ params }: { params: Params }) {
+  const specialtyData = getSpecialtyBySlug(params.specialty)
+  const locationSlug = params.location?.[0] || ''
+  const neighborhoodSlug = params.location?.[1]
+  const locationData = getLocationData(locationSlug, neighborhoodSlug)
+
+  if (!specialtyData || !locationData) {
+    return <div className="p-6 text-center">Invalid specialty or location</div>
+  }
+
+  const therapists = [] // replace with real therapist logic later
+
+  return (
+    <main className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-6">
+        {specialtyData.name} Therapists in {locationData.neighborhood || locationData.city}
+      </h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {therapists.length > 0 ? (
+          therapists.map((therapist: any) => (
+            <TherapistCard key={therapist.id} therapist={therapist} />
+          ))
+        ) : (
+          <p className="text-gray-600 col-span-full">No therapists found for this location and specialty.</p>
+        )}
+      </div>
+    </main>
+  )
+}

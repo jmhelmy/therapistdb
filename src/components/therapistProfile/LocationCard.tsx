@@ -1,15 +1,16 @@
 // src/components/therapistProfile/LocationCard.tsx
 import Card from '@/components/shared/Card';
-import { MapPin, Video, Users } from 'lucide-react'; // Icons
+import { MapPin, Video, Users, Globe2 } from 'lucide-react'; 
+import Section from '@/components/shared/Section';
 
 interface LocationCardProps {
   therapist: {
-    primaryAddress?: string | null; // Added for completeness if needed for a map link
+    primaryAddress?: string | null;
     primaryCity?: string | null;
     primaryState?: string | null;
     primaryZip?: string | null;
     locationDescription?: string | null;
-    nearbyCity1?: string | null; // Assuming these are fetched
+    nearbyCity1?: string | null;
     nearbyCity2?: string | null;
     nearbyCity3?: string | null;
     telehealth?: boolean | null;
@@ -25,66 +26,68 @@ export default function LocationCard({ therapist }: LocationCardProps) {
   } = therapist;
 
   const hasPrimaryLocation = primaryCity || primaryState || primaryZip;
-  const nearbyCities = [nearbyCity1, nearbyCity2, nearbyCity3].filter(Boolean).join(', ');
+  const nearbyCities = [nearbyCity1, nearbyCity2, nearbyCity3].filter(city => city && city.trim() !== '').join(' / ');
 
-  // Only render card if there's some location info or service type
   if (!hasPrimaryLocation && !locationDescription && !nearbyCities && telehealth === undefined && inPerson === undefined) {
     return null;
   }
 
   const fullAddress = [primaryAddress, primaryCity, primaryState, primaryZip].filter(Boolean).join(', ');
-  // Simple Google Maps link (replace with more robust solution if needed)
-  const mapLink = fullAddress ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}` : null;
-
+  const mapLink = hasPrimaryLocation ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}` : null;
 
   return (
-    <Card title="Practice Location & Availability" icon={<MapPin className="w-5 h-5 mr-2"/>}>
-      <div className="space-y-3 text-sm">
+    <Card title="Practice & Availability" icon={<MapPin size={20} className="text-teal-600" />}>
+      <div className="space-y-5 text-sm">
+        {(telehealth || inPerson) && ( // Moved session types to the top as they are primary
+            <Section title="Session Types Offered" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+                <div className="space-y-1.5">
+                    {telehealth && (
+                        <p className="flex items-center text-gray-700">
+                            <Video size={18} className="mr-2.5 shrink-0 text-teal-600"/> Offers Telehealth / Online Sessions
+                        </p>
+                    )}
+                    {inPerson && (
+                        <p className="flex items-center text-gray-700">
+                            <Users size={18} className="mr-2.5 shrink-0 text-blue-600"/> Offers In-Person Sessions
+                        </p>
+                    )}
+                </div>
+            </Section>
+        )}
+        
         {hasPrimaryLocation && (
-          <div>
-            <p className="font-medium text-gray-800">
-              {primaryCity && `${primaryCity}, `}{primaryState && `${primaryState} `}{primaryZip && primaryZip}
-            </p>
-            {primaryAddress && <p className="text-gray-600">{primaryAddress}</p>}
-            {mapLink && (
-                <a
-                  href={mapLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-teal-600 hover:underline"
-                >
-                  View on map
-                </a>
-            )}
-          </div>
+          <Section title="Office Location" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+            <div className="text-gray-700">
+              {primaryAddress && <p>{primaryAddress}</p>}
+              <p>{primaryCity && `${primaryCity}, `}{primaryState && `${primaryState} `}{primaryZip && primaryZip}</p>
+              {mapLink && (
+                  <a
+                    href={mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center text-xs text-teal-600 hover:underline"
+                  >
+                    Get Directions <Globe2 size={12} className="ml-1"/>
+                  </a>
+              )}
+            </div>
+          </Section>
         )}
 
-        {locationDescription && (
-          <p className="text-gray-600 pt-1 border-t border-gray-100 mt-2">{locationDescription}</p>
+        {locationDescription && locationDescription.trim() !== '' && (
+          <Section title="About My Office" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+            <p className="text-gray-600 whitespace-pre-line leading-relaxed">{locationDescription}</p>
+          </Section>
         )}
 
         {nearbyCities && (
-          <p className="text-xs text-gray-500 mt-1">
-            <span className="font-medium">Also serving:</span> {nearbyCities}
-          </p>
+          <Section title="Also Serving Nearby Areas" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+            <p className="text-gray-600">{nearbyCities}</p>
+          </Section>
         )}
-
-        {(telehealth !== undefined || inPerson !== undefined) && (
-            <div className="pt-3 border-t border-gray-100 mt-3 space-y-1">
-                {telehealth && (
-                    <p className="flex items-center text-green-700">
-                        <Video size={16} className="mr-2 shrink-0"/> Offers Telehealth Sessions
-                    </p>
-                )}
-                 {inPerson && (
-                    <p className="flex items-center text-blue-700">
-                        <Users size={16} className="mr-2 shrink-0"/> Offers In-Person Sessions
-                    </p>
-                )}
-            </div>
-        )}
-         {!hasPrimaryLocation && telehealth === false && inPerson === false && (
-            <p className="text-gray-500 italic">Location details not specified. Please contact for more information.</p>
+         
+         {!hasPrimaryLocation && !telehealth && !inPerson && ( // If no location and no session types
+            <p className="text-gray-500 italic">Service location and types not specified. Please contact for more information.</p>
          )}
       </div>
     </Card>
