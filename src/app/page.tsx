@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth'; // Assuming this path is correct
 import BrowseByState from '@/components/home/BrowseByState'; // Assuming this path is correct
 import { prisma } from '@/lib/prisma'; // Assuming this path is correct
 import { Search, Users, MapPin, FileText, MessageSquare, Smile, Heart, Shield, Users2, Brain, GitFork, UsersRound, Briefcase, RefreshCw } from 'lucide-react'; // Example icons
+import FeaturedTherapists from '@/components/home/FeaturedTherapists'; // <<< IMPORT NEW COMPONENT
 
 // SEO Metadata - Your existing metadata is good.
 export const metadata: Metadata = {
@@ -160,6 +161,8 @@ export default async function HomePage() {
 
       {/* Browse by State Component (passed from here) */}
       <BrowseByState />
+
+      <FeaturedTherapists />
 
       {/* From the Blog Section */}
       <section className="py-16 md:py-20 px-4">

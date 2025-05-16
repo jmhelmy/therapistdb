@@ -68,7 +68,7 @@ export default function TreatmentStyleCard({ therapist }: TreatmentStyleCardProp
               {validStyles.map(style => (
                 <span
                   key={style}
-                  className="inline-flex items-center bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium border border-gray-200 hover:bg-gray-200 transition-colors shadow-sm"
+                  className="inline-flex items-center bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-xs sm:text-base font-medium border border-gray-200 hover:bg-gray-200 transition-colors shadow-sm"
                   title={style}
                 >
                   {modalityIcons[style] || <MessageSquare size={14} className="mr-1.5 text-gray-400" />}

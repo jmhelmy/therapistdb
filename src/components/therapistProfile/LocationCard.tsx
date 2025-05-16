@@ -37,9 +37,9 @@ export default function LocationCard({ therapist }: LocationCardProps) {
 
   return (
     <Card title="Practice & Availability" icon={<MapPin size={20} className="text-teal-600" />}>
-      <div className="space-y-5 text-sm">
+      <div className="space-y-5 text-base">
         {(telehealth || inPerson) && ( // Moved session types to the top as they are primary
-            <Section title="Session Types Offered" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+            <Section title="Session Types Offered" titleClassName="text-base font-semibold text-gray-700 mb-1.5">
                 <div className="space-y-1.5">
                     {telehealth && (
                         <p className="flex items-center text-gray-700">
@@ -56,7 +56,7 @@ export default function LocationCard({ therapist }: LocationCardProps) {
         )}
         
         {hasPrimaryLocation && (
-          <Section title="Office Location" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+          <Section title="Office Location" titleClassName="text-base font-semibold text-gray-700 mb-1.5">
             <div className="text-gray-700">
               {primaryAddress && <p>{primaryAddress}</p>}
               <p>{primaryCity && `${primaryCity}, `}{primaryState && `${primaryState} `}{primaryZip && primaryZip}</p>
@@ -75,13 +75,13 @@ export default function LocationCard({ therapist }: LocationCardProps) {
         )}
 
         {locationDescription && locationDescription.trim() !== '' && (
-          <Section title="About My Office" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+          <Section title="About My Office" titleClassName="text-base font-semibold text-gray-700 mb-1.5">
             <p className="text-gray-600 whitespace-pre-line leading-relaxed">{locationDescription}</p>
           </Section>
         )}
 
         {nearbyCities && (
-          <Section title="Also Serving Nearby Areas" titleClassName="text-sm font-semibold text-gray-700 mb-1.5">
+          <Section title="Also Serving Nearby Areas" titleClassName="text-base font-semibold text-gray-700 mb-1.5">
             <p className="text-gray-600">{nearbyCities}</p>
           </Section>
         )}

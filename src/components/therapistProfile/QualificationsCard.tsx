@@ -46,7 +46,7 @@ export default function QualificationsCard({ therapist }: QualificationsCardProp
 
   return (
     <Card title="Credentials & Experience" icon={<Award size={20} className="text-teal-600"/>}>
-      <dl className="space-y-2.5 text-sm"> {/* Use dl for definition list */}
+      <dl className="space-y-2.5 text-base"> {/* Use dl for definition list */}
         {displayedProfession && <Fact label="Profession / Title" value={displayedProfession} icon={<Briefcase size={16} className="text-gray-500 mr-1.5"/>} />}
         {licenseInfo && <Fact label="License" value={licenseInfo} />}
         {licenseStatus && <Fact label="License Status" value={licenseStatus ? licenseStatus.charAt(0).toUpperCase() + licenseStatus.slice(1) : undefined} />}

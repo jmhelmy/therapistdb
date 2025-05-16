@@ -59,7 +59,7 @@ export default function SpecialtiesCard({ therapist }: SpecialtiesCardProps) {
       <div className="space-y-5">
         {specialtyDescription && specialtyDescription.trim() !== '' && (
           <Section title="My Approach to Client Concerns" titleClassName="text-base font-medium text-gray-800 mb-1.5">
-            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{specialtyDescription}</p>
+            <p className="text-base text-gray-600 whitespace-pre-line leading-relaxed">{specialtyDescription}</p>
           </Section>
         )}
 
@@ -67,7 +67,7 @@ export default function SpecialtiesCard({ therapist }: SpecialtiesCardProps) {
           <Section title="Primary Focus Areas" titleClassName="text-base font-medium text-gray-800 mb-2">
             <ul className="space-y-2"> {/* Increased spacing for primary list items */}
               {primaryFocusIssues.map(issue => (
-                <li key={issue} className="flex items-center text-sm text-gray-800">
+                <li key={issue} className="flex items-center text-base text-gray-800">
                   <span className="inline-flex h-6 w-6 items-center justify-center mr-2.5 shrink-0"> {/* Container for icon/emoji */}
                     {specialtyVisuals[issue] || <Brain size={16} className="text-gray-400" />}
                   </span>
