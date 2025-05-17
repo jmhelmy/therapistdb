@@ -7,11 +7,13 @@ import QualificationsForm from './tabs/QualificationsForm'
 import PersonalStatementForm from './tabs/PersonalStatementForm'
 import SpecialtiesForm from './tabs/SpecialtiesForm'
 import TreatmentStyleForm from './tabs/TreatmentStyleForm'
+import ClientMagnetAIMain from './tabs/clientMagnetAI'
 import { Tab } from './ProfileWizard'
 
 export default function WizardFormBody({ activeTab }: { activeTab: Tab }) {
   return (
     <>
+      {activeTab === 'ClientMagnetAI' && <ClientMagnetAIMain />}
       {activeTab === 'Basics' && <BasicsForm />}
       {activeTab === 'Location' && <LocationForm />}
       {activeTab === 'Finances' && <FinancesForm />}

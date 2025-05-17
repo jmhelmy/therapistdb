@@ -1,14 +1,14 @@
 // src/components/therapistAccount/build-profile/ProfileWizard.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'; // Added useSearchParams, usePathname
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import useLoadTherapistData from './hooks/useLoadTherapistData';
 import BuildProfileHeader from './BuildProfileHeader';
 import StepTabs from './StepTabs';
-import WizardFormBody from './WizardFormBody';
+import WizardFormBody from './WizardFormBody'; // Ensure this imports ClientMagnetAIForm
 import StepFooter from './StepFooter';
 import LoadingScreen from './LoadingScreen';
 import {
@@ -17,31 +17,62 @@ import {
   defaultFormData
 } from '@/lib/schemas/therapistSchema'; // Adjust path if necessary
 
+// --- MODIFIED TABS ARRAY ---
+// Added 'ClientMagnetAI'. Ensure its position is where you want it in the flow.
 const TABS = [
   'Basics',
   'Location',
   'Finances',
   'Qualifications',
   'PersonalStatement',
+  'ClientMagnetAI', // <<< ADDED 'ClientMagnetAI' TAB
   'Specialties',
   'TreatmentStyle',
 ] as const;
 
 export type Tab = typeof TABS[number];
 
+// Helper to check if a string is a valid Tab type
+const isValidTab = (tab: string | null | undefined): tab is Tab => {
+  return TABS.includes(tab as Tab);
+};
+
 export default function ProfileWizard() {
   const router = useRouter();
+  const pathname = usePathname(); // Get current pathname
+  const searchParams = useSearchParams(); // Hook to get URL search parameters
+
   const methods = useForm<FullTherapistProfile>({
     resolver: zodResolver(fullTherapistSchema),
-    defaultValues: defaultFormData,
+    defaultValues: defaultFormData, // Ensure this includes clientMagnetProfile: null
     mode: 'onBlur',
   });
 
   const { isLoadingProfile, initialLoadComplete, serverErrorMessage } = useLoadTherapistData(methods);
 
-  const [activeTab, setActiveTab] = useState<Tab>('Basics');
+  // Initialize activeTab from URL search parameter if present and valid, otherwise default to 'Basics'
+  const initialTabFromUrl = searchParams.get('tab');
+  const [activeTab, setActiveTabInternal] = useState<Tab>(() => {
+    return isValidTab(initialTabFromUrl) ? initialTabFromUrl : 'Basics';
+  });
+
+  // Effect to sync activeTab with URL on initial load or if URL changes externally
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (isValidTab(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTabInternal(tabFromUrl);
+    }
+    // If no tab in URL when component mounts, and default is 'Basics', ensure URL reflects this.
+    // This is optional but good for consistency if you want the URL to always show the tab.
+    // else if (!tabFromUrl && activeTab === 'Basics' && initialLoadComplete) {
+    //   const currentSearchParams = new URLSearchParams(Array.from(searchParams.entries()));
+    //   currentSearchParams.set('tab', 'Basics');
+    //   router.replace(`${pathname}?${currentSearchParams.toString()}`, { scroll: false });
+    // }
+  }, [searchParams, activeTab, initialLoadComplete, pathname, router]); // Added dependencies
+
   const currentIndex = TABS.indexOf(activeTab);
-  const isLastStep = currentIndex === TABS.length - 1; // Renamed from isLast for clarity
+  const isLastStep = currentIndex === TABS.length - 1;
 
   const watchedId = methods.watch('id');
   const watchedName = methods.watch('name');
@@ -61,8 +92,19 @@ export default function ProfileWizard() {
     ? `/therapists/${watchedId}?preview=true`
     : '#';
 
+  // --- NEW: Handler to set active tab and update URL ---
+  const handleSetActiveTab = useCallback((tab: Tab) => {
+    setActiveTabInternal(tab);
+    const currentSearchParams = new URLSearchParams(Array.from(searchParams.entries()));
+    currentSearchParams.set('tab', tab);
+    // Using router.replace to avoid cluttering browser history with tab changes.
+    // Use router.push if you prefer tab changes to be distinct history entries.
+    router.replace(`${pathname}?${currentSearchParams.toString()}`, { scroll: false });
+  }, [router, pathname, searchParams]);
+
+
   const onSubmit = async (data: FullTherapistProfile) => {
-    console.log('Submitting validated data:', data);
+    console.log('Submitting validated data (ProfileWizard):', data);
     if (!watchedId && !data.id) {
       alert('Profile ID is missing. Cannot save.');
       return;
@@ -86,19 +128,19 @@ export default function ProfileWizard() {
       }
 
       const responseData = await res.json();
-      console.log('✅ Profile saved successfully:', responseData);
+      console.log('✅ Profile saved successfully (ProfileWizard):', responseData);
       if (responseData.therapist) {
         methods.reset(responseData.therapist, {
-          keepDirtyValues: true, // Keep changes user made since last save if server doesn't return them
+          keepDirtyValues: true,
           keepSubmitCount: true,
           keepIsSubmitted: true,
-          // keepValues: true, // Might be useful if server only returns partial data
         });
         console.log('Form updated with server data after save.');
       }
 
       if (!isLastStep) {
-        setActiveTab(TABS[currentIndex + 1]);
+        const nextTab = TABS[currentIndex + 1];
+        handleSetActiveTab(nextTab); // <<< USE NEW HANDLER
       } else {
         alert("Profile saved successfully! All steps complete.");
         // Consider router.push('/account') or similar for final step
@@ -110,18 +152,17 @@ export default function ProfileWizard() {
   };
 
   const handleNext = async () => {
-    const isValid = await methods.trigger(); // Validate all fields (or current tab's fields)
+    const isValid = await methods.trigger();
     if (isValid) {
-      methods.handleSubmit(onSubmit)();
+      methods.handleSubmit(onSubmit)(); // This will call onSubmit, which now handles URL update for next tab
     } else {
       console.log("Validation errors:", methods.formState.errors);
-      // Optionally, find the first field with an error and scroll to it.
-      // Or simply rely on RHF showing errors within the form.
       alert("Please correct the errors on the form before continuing.");
     }
   };
 
   const handleUnpublish = async () => {
+    // ... (your existing handleUnpublish logic remains the same) ...
     if (!watchedSlug && !watchedId) return;
     const identifier = watchedSlug || watchedId;
     try {
@@ -135,21 +176,18 @@ export default function ProfileWizard() {
     }
   };
 
-  // Apply overall page background in a higher-level layout or via global CSS.
-  // For this component, we assume it's placed on a page with the desired light grey background.
-  // e.g., in your src/app/build-profile/page.tsx or src/app/layout.tsx: <body className="bg-slate-100">
 
   if (isLoadingProfile && !initialLoadComplete) {
     return <LoadingScreen />;
   }
-  if (serverErrorMessage && !initialLoadComplete) { // Show server error only if it's an initial load problem
+  if (serverErrorMessage && !initialLoadComplete) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-4">
         <div className="bg-white p-8 rounded-lg shadow-md text-center">
           <h2 className="text-xl font-semibold text-red-600 mb-4">Error Loading Profile</h2>
           <p className="text-gray-700">{serverErrorMessage}</p>
           <button
-            onClick={() => window.location.reload()} // Simple reload attempt
+            onClick={() => window.location.reload()}
             className="mt-6 px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition"
           >
             Try Again
@@ -159,18 +197,14 @@ export default function ProfileWizard() {
     );
   }
 
-  // Define footer height for padding. Adjust this based on your StepFooter's actual height.
-  // Common heights: 16 (64px), 20 (80px), 24 (96px).
-  // StepFooter has py-4 (32px) + button height + border. Let's assume ~80px, so pb-20 or pb-24.
-  const FOOTER_PADDING_CLASS = "pb-24"; // 96px padding for footer
+  const FOOTER_PADDING_CLASS = "pb-24";
 
   return (
     <FormProvider {...methods}>
-      {/* The form now wraps the entire structure including header and footer */}
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
         noValidate
-        className="flex flex-col min-h-screen bg-slate-50" // Main background if not set globally
+        className="flex flex-col min-h-screen bg-slate-50"
       >
         <BuildProfileHeader
           formDataForHeader={currentFormDataForHeader}
@@ -178,28 +212,25 @@ export default function ProfileWizard() {
           previewUrl={previewUrl}
         />
 
-        {/* Main content area that scrolls, with padding for the fixed footer */}
         <main className={`flex-grow max-w-4xl w-full mx-auto py-8 px-4 sm:px-6 lg:px-8 ${FOOTER_PADDING_CLASS}`}>
           <StepTabs
-            tabs={TABS}
+            tabs={TABS} // Ensure TABS array includes 'ClientMagnetAI'
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleSetActiveTab} // <<< USE NEW HANDLER
           />
           <div className="mt-8">
-            {/* WizardFormBody renders the active tab's form (e.g., BasicsForm) */}
-            {/* These forms (BasicsForm, etc.) will have their own bg-white, shadow, padding */}
-            <WizardFormBody activeTab={activeTab} />
+            <WizardFormBody activeTab={activeTab} /> {/* Ensure WizardFormBody handles 'ClientMagnetAI' tab */}
           </div>
         </main>
 
         <StepFooter
           step={currentIndex + 1}
-          tabs={TABS as any}
+          tabs={TABS}
           isSaving={methods.formState.isSubmitting}
-          back={() => {
-            if (currentIndex > 0) setActiveTab(TABS[currentIndex - 1]);
+          back={() => { // <<< USE NEW HANDLER FOR BACK
+            if (currentIndex > 0) handleSetActiveTab(TABS[currentIndex - 1]);
           }}
-          next={handleNext}
+          next={handleNext} // This calls onSubmit which handles setting next tab and URL
         />
       </form>
     </FormProvider>

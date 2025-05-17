@@ -93,12 +93,12 @@ export const specialtiesSchema = z.object({
   issues: z.array(z.string()).optional().default([]), // Main list of issues therapist treats
   topIssues: z.array(z.string()).max(3, "Select up to 3 top issues.").optional().default([]), // User-selected top 3
   specialtyDescription: optionalNullableString,
-  mentalHealthInterests: z.array(z.string()).optional().default([]), // Add to Prisma if persisting
-  sexualityInterests: z.array(z.string()).optional().default([]),    // Add to Prisma if persisting
+  mentalHealthInterests: z.array(z.string()).optional().default([]),
+  sexualityInterests: z.array(z.string()).optional().default([]),
   ages: z.array(z.string()).optional().default([]),
   participants: z.array(z.string()).optional().default([]),
   communities: z.array(z.string()).optional().default([]),
-  faithInterests: z.array(z.string()).optional().default([]),        // Add to Prisma if persisting
+  faithInterests: z.array(z.string()).optional().default([]),
   languages: z.array(z.string()).optional().default([]),
 });
 export type SpecialtiesFormValues = z.infer<typeof specialtiesSchema>;
@@ -109,6 +109,26 @@ export const treatmentStyleSchema = z.object({
   treatmentStyleDescription: optionalNullableString,
 });
 export type TreatmentStyleFormValues = z.infer<typeof treatmentStyleSchema>;
+
+// --- NEW: 8. Client Magnet AI Profile Schema ---
+// This schema defines the structure for the data related to the Client Magnet AI feature.
+// These fields correspond to what we planned to store in the ClientMagnetProfile Prisma model.
+export const clientMagnetProfileSchema = z.object({
+  // Stores the main AI-generated marketing copy.
+  // This is the text the therapist will review, edit, and potentially use in their profile.
+  aiGeneratedMarketingCopy: optionalNullableString,
+
+  // Stores the therapist's answer to the intake question: "Tell me about a client you liked working with"
+  clientStoryExample: optionalNullableString,
+
+  // Stores the therapist's notes or ideas related to the intake question: "Do you have a good video to upload?"
+  videoUploadIdeas: optionalNullableString,
+
+  // You could add an optional field here if you decide to store the AI-suggested tagline separately
+  // within the clientMagnetProfile object, e.g.:
+  // aiSuggestedTagline: optionalNullableString,
+});
+export type ClientMagnetProfileFormValues = z.infer<typeof clientMagnetProfileSchema>;
 
 
 // --- Full Merged Therapist Profile Schema ---
@@ -124,6 +144,9 @@ export const fullTherapistSchema = basicsSchema
     slug: z.string().nullable().optional().or(z.literal('')),
     published: z.boolean().default(false).optional(),
     // userId: z.string().cuid() // Example: if you link therapist profiles to a User model
+
+    // --- NEW: Add the Client Magnet AI profile data as an optional and nullable object ---
+    clientMagnetProfile: clientMagnetProfileSchema.optional().nullable(),
   });
 
 export type FullTherapistProfile = z.infer<typeof fullTherapistSchema>;
@@ -132,14 +155,14 @@ export type FullTherapistProfile = z.infer<typeof fullTherapistSchema>;
 export const defaultFormData: FullTherapistProfile = {
   // Top-level
   id: undefined,
-  slug: '', // Cannot be null, as per schema (optional().or(z.literal('')))
+  slug: '',
   published: false,
 
   // Basics
-  name: '', // Cannot be null, as per optionalStringCannotBeNull
+  name: '',
   primaryCredential: null,
   primaryCredentialAlt: null,
-  gender: null, // Can be null
+  gender: null,
   phone: null,
   workEmail: null,
   website: null,
@@ -155,18 +178,18 @@ export const defaultFormData: FullTherapistProfile = {
   additionalCity: null,
   additionalState: null,
   additionalZip: null,
-  telehealth: null, // Or false if that's a more active default
-  inPerson: null,   // Or false
+  telehealth: null,
+  inPerson: null,
   locationDescription: null,
 
   // Finances
-  feeIndividual: '', // Empty string is fine for optionalNullableString
+  feeIndividual: '',
   feeCouples: '',
-  slidingScale: null, // Or false
-  freeConsultation: null, // Or false
+  slidingScale: null,
+  freeConsultation: null,
   feeComment: '',
   paymentMethods: [],
-  insuranceAccepted: '', // Or null
+  insuranceAccepted: '',
 
   // Personal Statement
   tagline: null,
@@ -175,7 +198,7 @@ export const defaultFormData: FullTherapistProfile = {
   personalStatement3: null,
 
   // Qualifications
-  licenseStatus: null, // Or undefined
+  licenseStatus: null,
   profession: null,
   licenseNumber: null,
   licenseState: null,
@@ -201,4 +224,15 @@ export const defaultFormData: FullTherapistProfile = {
   // Treatment Style
   treatmentStyle: [],
   treatmentStyleDescription: null,
+
+  // --- NEW: Default values for Client Magnet AI Profile data ---
+  // Initialize as null because the entire ClientMagnetProfile record is optional for a therapist.
+  // If a therapist interacts with the feature, this object will be populated.
+  clientMagnetProfile: null,
+  // If you prefer to always have the object structure present, even with null fields:
+  // clientMagnetProfile: {
+  //   aiGeneratedMarketingCopy: null,
+  //   clientStoryExample: null,
+  //   videoUploadIdeas: null,
+  // },
 };

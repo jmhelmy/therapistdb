@@ -1,0 +1,142 @@
+// src/components/therapistAccount/build-profile/tabs/clientMagnetAI/useClientMagnetAI.ts
+import { useState, useCallback } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { FullTherapistProfile } from '@/lib/schemas/therapistSchema'; // Ensure this path and type are correct
+import type { AIResponseDraft, AIPromptPayload, AITone } from './types'; // Ensure these types are defined
+import { DEFAULT_AI_TONE } from './constants'; // Ensure this constant is defined
+
+// This interface would typically be in ./types.ts but is included here for context
+// if not already explicitly defined in what user provided.
+// Assuming ClientMagnetAIState was conceptual in previous discussions and not strictly typed yet:
+interface ClientMagnetHookState {
+  isLoadingAI: boolean;
+  aiError: string | null;
+  currentDraft: AIResponseDraft | null;
+  // selectedTone and coreValuesInput are managed directly as useState variables below
+}
+
+
+export function useClientMagnetAI() {
+  const { getValues, setValue } = useFormContext<FullTherapistProfile>();
+
+  const [isLoadingAI, setIsLoadingAI] = useState<ClientMagnetHookState['isLoadingAI']>(false);
+  const [aiError, setAiError] = useState<ClientMagnetHookState['aiError']>(null);
+  const [currentDraft, setCurrentDraft] = useState<ClientMagnetHookState['currentDraft']>(null);
+  const [selectedTone, setSelectedTone] = useState<AITone>(DEFAULT_AI_TONE);
+  
+  // For intake fields not directly part of the main RHF schema but used for AI prompting
+  const [coreValuesInput, setCoreValuesInput] = useState<string>('');
+
+
+  const generateDraft = useCallback(async () => {
+    setIsLoadingAI(true);
+    setAiError(null);
+    setCurrentDraft(null); // Clear previous draft
+
+    const formValues = getValues();
+    const payload: AIPromptPayload = {
+      clientStoryExample: formValues.clientMagnetProfile?.clientStoryExample,
+      videoUploadIdeas: formValues.clientMagnetProfile?.videoUploadIdeas,
+      coreValues: coreValuesInput,
+      tone: selectedTone,
+      // Consider sending existing text for refinement if that's a feature:
+      // existingTagline: formValues.tagline,
+      // existingBody: formValues.personalStatement1,
+    };
+
+    try {
+      const response = await fetch('/api/ai/generate-marketing-copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        // Try to parse error message from API, otherwise use a generic one
+        let errorResponseMessage = `AI service failed with status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorResponseMessage = errorData.error || errorData.message || errorResponseMessage;
+        } catch (e) {
+          // Failed to parse JSON error, stick with status code error
+          console.warn("Could not parse error JSON from API on non-OK response.");
+        }
+        throw new Error(errorResponseMessage);
+      }
+
+      const data: { draft: AIResponseDraft } = await response.json();
+
+      // Check if the draft and its essential content exist
+      if (data && data.draft && (data.draft.suggestedBody || data.draft.suggestedTagline)) {
+        setCurrentDraft(data.draft);
+
+        // Pre-fill the main RHF field for AI-generated copy so it's part of the form state
+        if (data.draft.suggestedBody) {
+          setValue('clientMagnetProfile.aiGeneratedMarketingCopy', data.draft.suggestedBody, {
+            shouldDirty: true,
+            shouldValidate: true, // Trigger validation if you have rules on this field
+          });
+        }
+        // Example: If you add a dedicated field in your Zod/Prisma schema for an AI-suggested tagline
+        // within clientMagnetProfile:
+        // if (data.draft.suggestedTagline && formValues.clientMagnetProfile) {
+        //    setValue('clientMagnetProfile.aiSuggestedTagline', data.draft.suggestedTagline, {
+        //      shouldDirty: true,
+        //      shouldValidate: true,
+        //    });
+        // }
+      } else {
+        console.error("AI response was OK but draft content is missing or malformed:", data);
+        throw new Error("AI service returned an incomplete or empty draft. Please try again.");
+      }
+
+    } catch (error: any) {
+      console.error("AI Generation Error (useClientMagnetAI hook):", error);
+      setAiError(error.message || "An unexpected error occurred while generating suggestions.");
+      setCurrentDraft(null); // Ensure no stale draft is shown on error
+    } finally {
+      setIsLoadingAI(false);
+    }
+  }, [getValues, setValue, selectedTone, coreValuesInput]); // Dependencies for useCallback
+
+  const applyDraftToProfile = useCallback(() => {
+    if (!currentDraft) {
+        // Optionally, provide feedback to the user via an alert or a toast notification
+        // For example: alert("No AI draft available to apply. Please generate one first.");
+        return false; // Indicate failure or no action taken
+    }
+
+    const { suggestedTagline, suggestedBody } = currentDraft;
+
+    // Apply to tagline field in the main form (defined in personalStatementSchema)
+    if (suggestedTagline) {
+      setValue('tagline', suggestedTagline, { shouldDirty: true, shouldValidate: true });
+    }
+
+    // Apply to personal statement fields (defined in personalStatementSchema)
+    if (suggestedBody) {
+      // This strategy puts the whole body into personalStatement1.
+      // You might want a more sophisticated way to split it if your AI provides sectioned content
+      // and you have personalStatement2, personalStatement3 fields for that.
+      setValue('personalStatement1', suggestedBody, { shouldDirty: true, shouldValidate: true });
+      setValue('personalStatement2', '', { shouldDirty: true, shouldValidate: false }); // Clear others
+      setValue('personalStatement3', '', { shouldDirty: true, shouldValidate: false });
+    }
+    return true; // Indicate success
+  }, [currentDraft, setValue]); // Dependencies for useCallback
+
+  // Expose state and action dispatchers to the consuming component
+  return {
+    isLoadingAI,
+    aiError,
+    currentDraft,
+    selectedTone,
+    setSelectedTone,
+    coreValuesInput,
+    setCoreValuesInput,
+    generateDraft,
+    applyDraftToProfile,
+    clearError: useCallback(() => setAiError(null), []), // Memoize simple setters
+    clearDraft: useCallback(() => setCurrentDraft(null), []),
+  };
+}

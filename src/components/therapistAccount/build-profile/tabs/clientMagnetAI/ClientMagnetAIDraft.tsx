@@ -1,0 +1,2 @@
+ClientMagnetAIDraft.tsx
+'use client';

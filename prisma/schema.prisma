@@ -24,10 +24,21 @@ enum LicenseStatus {
   none
 }
 
+// --- NEW ENUM FOR AVAILABILITY ---
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
 model User {
   id        String     @id @default(uuid())
   email     String     @unique
-  password  String // REMEMBER: Store HASHED passwords, not plaintext
+  password  String
   therapist Therapist?
 
   createdAt DateTime @default(now())
@@ -41,18 +52,18 @@ model Therapist {
   slug                 String?   @unique
   published            Boolean   @default(false)
 
-  // --- Basics from Zod ---
+  // --- Basics ---
   name                 String?
   primaryCredential    String?
   primaryCredentialAlt String?
-  gender               Gender?   // Uses updated Gender enum
+  gender               Gender?
   phone                String?
   workEmail            String?
   website              String?
   imageUrl             String?
   coverImageUrl        String?
 
-  // --- Location from Zod ---
+  // --- Location ---
   primaryAddress       String?
   primaryCity          String?
   primaryState         String?
@@ -65,7 +76,7 @@ model Therapist {
   inPerson             Boolean?
   locationDescription  String?   @db.Text
 
-  // --- SEO (from your previous schema) ---
+  // --- SEO ---
   seoZip1              String?
   seoZip2              String?
   seoZip3              String?
@@ -73,48 +84,60 @@ model Therapist {
   nearbyCity2          String?
   nearbyCity3          String?
 
-  // --- Finances from Zod ---
-  feeIndividual        Int?      // MODIFIED: Changed from String? for proper price filtering
-  feeCouples           Int?      // MODIFIED: Changed from String?
+  // --- Finances ---
+  feeIndividual        Int?
+  feeCouples           Int?
   slidingScale         Boolean?
   freeConsultation     Boolean?
   feeComment           String?   @db.Text
   paymentMethods       String[]  @default([])
-  // insuranceAccepted    String[]  @default([]) // MODIFIED: Changed from String? to support multiple & 'has' query
+  // insuranceAccepted String[]  @default([])
 
-  // --- Qualifications from Zod ---
-  licenseStatus          LicenseStatus?
-  profession             String?
-  licenseNumber          String?
-  licenseState           String?
+  // --- Qualifications ---
+  licenseStatus        LicenseStatus?
+  profession           String?
+  licenseNumber        String?
+  licenseState         String?
   licenseExpirationMonth Int?
   licenseExpirationYear  Int?
-  educationSchool        String?
-  educationDegree        String?
+  educationSchool      String?
+  educationDegree      String?
   educationYearGraduated Int?
-  practiceStartYear      Int?
+  practiceStartYear    Int?
 
-  // --- Personal Statement from Zod ---
+  // --- Personal Statement ---
   tagline              String?   @db.Text
   personalStatement1   String?   @db.Text
   personalStatement2   String?   @db.Text
   personalStatement3   String?   @db.Text
 
-  // --- Specialties from Zod ---
-  issues                 String[]  @default([])
-  topIssues              String[]  @default([])
-  specialtyDescription   String?   @db.Text
-  mentalHealthInterests  String[]  @default([])
-  sexualityInterests     String[]  @default([])
-  ages                   String[]  @default([]) // Used by Age filter
-  participants           String[]  @default([])
-  communities            String[]  @default([]) // Used by Faith filter
-  faithInterests         String[]  @default([])
-  languages              String[]  @default([]) // Used by Language filter
+  // --- Specialties ---
+  issues               String[]  @default([])
+  topIssues            String[]  @default([])
+  specialtyDescription String?   @db.Text
+  mentalHealthInterests String[]  @default([])
+  sexualityInterests   String[]  @default([])
+  ages                 String[]  @default([])
+  participants         String[]  @default([])
+  communities          String[]  @default([])
+  faithInterests       String[]  @default([])
+  languages            String[]  @default([])
 
-  // --- Treatment Style from Zod ---
-  treatmentStyle           String[]  @default([]) // Used by Type of Therapy filter
+  // --- Treatment Style ---
+  treatmentStyle       String[]  @default([])
   treatmentStyleDescription String?   @db.Text
+
+  // --- Client Magnet AI Profile Relation ---
+  clientMagnetProfile  ClientMagnetProfile?
+
+  // --- EHR Feature Relations ---
+  clients              Client[]
+  appointments         Appointment[]
+  clientNotes          ClientNote[]
+
+  // --- NEW RELATIONS FOR AVAILABILITY ---
+  weeklyAvailabilities WeeklyAvailability[] @relation("TherapistWeeklyAvailability")
+  dateOverrides        DateOverride[]       @relation("TherapistDateOverrides")
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -131,4 +154,122 @@ model BlogPost {
   published       Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @default(now()) @updatedAt
+}
+
+model ClientMagnetProfile {
+  id                       String    @id @default(cuid())
+  therapistId              String    @unique
+  therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  aiGeneratedMarketingCopy String?   @db.Text
+  clientStoryExample       String?   @db.Text
+  videoUploadIdeas         String?   @db.Text
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+}
+
+model Client {
+  id                       String    @id @default(cuid())
+  therapistId              String
+  therapist                Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  firstName                String
+  lastName                 String
+  email                    String?
+  phone                    String?
+  dateOfBirth              DateTime? @db.Date
+  addressLine1             String?
+  addressLine2             String?
+  city                     String?
+  state                    String?
+  zipCode                  String?
+  intakeFormCompleted      Boolean   @default(false)
+  preferredName            String?
+  pronouns                 String?
+  emergencyContactName     String?
+  emergencyContactPhone    String?
+  emergencyContactRelationship String?
+  appointments             Appointment[]
+  notes                    ClientNote[]
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  @@index([therapistId, lastName, firstName])
+  // @@unique([therapistId, email]) // Consider this if email must be unique per therapist
+}
+
+model Appointment {
+  id                String    @id @default(cuid())
+  therapistId       String
+  therapist         Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  clientId          String
+  client            Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  startTime         DateTime
+  endTime           DateTime
+  appointmentType   String?
+  status            String    @default("Scheduled")
+  locationType      String?
+  locationDetails   String?
+  isTelehealth      Boolean   @default(false)
+  privateNotes      String?   @db.Text
+  reminderSent      Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([therapistId, startTime])
+  @@index([clientId, startTime])
+}
+
+model ClientNote {
+  id            String    @id @default(cuid())
+  therapistId   String
+  therapist     Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  clientId      String
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  noteType      String
+  content       String    @db.Text
+  dateOfService DateTime
+  isLocked      Boolean   @default(false)
+  lockedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([clientId, dateOfService, createdAt])
+}
+
+// --- NEW MODELS FOR THERAPIST AVAILABILITY ---
+
+model WeeklyAvailability {
+  id                 String    @id @default(cuid())
+  therapistId        String
+  therapist          Therapist @relation("TherapistWeeklyAvailability", fields: [therapistId], references: [id], onDelete: Cascade)
+
+  dayOfWeek          DayOfWeek // e.g., MONDAY, TUESDAY
+  startTime          String    // Store as "HH:mm" format (e.g., "09:00")
+  endTime            String    // Store as "HH:mm" format (e.g., "17:00")
+
+  effectiveStartDate DateTime? @db.Date // Optional: Date this recurring rule starts
+  effectiveEndDate   DateTime? @db.Date // Optional: Date this recurring rule ends
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([therapistId, dayOfWeek, startTime, endTime, effectiveStartDate])
+  @@index([therapistId])
+}
+
+model DateOverride {
+  id                 String    @id @default(cuid())
+  therapistId        String
+  therapist          Therapist @relation("TherapistDateOverrides", fields: [therapistId], references: [id], onDelete: Cascade)
+
+  date               DateTime  @db.Date // The specific date this override applies to
+  isAvailable        Boolean   // True if it's a specific block of availability, false if it's a block of unavailability
+  startTime          String?   // "HH:mm" - Optional: if null and isAvailable=false, whole day is off. If null and isAvailable=true, might refer to full standard day.
+  endTime            String?   // "HH:mm" - Optional
+
+  reason             String?   // Optional reason, e.g., "Holiday", "Personal Time Off", "Extended Hours Conference"
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([therapistId, date])
 }
