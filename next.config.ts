@@ -32,6 +32,21 @@ const nextConfig: NextConfig = {
       //   hostname: "another-image-host.com",
       //   pathname: "/**",
       // },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**", // Allow any path under this hostname
+      },
+      {
+        protocol: "https",
+        hostname: "www.therapyden.com",
+        pathname: "/**", // Allow any path under this hostname
+      },
+      {
+        protocol: "https",
+        hostname: "www.therapytribe.com",
+        pathname: "/**", // Allow any path under this hostname
+      },
     ],
   },
 };

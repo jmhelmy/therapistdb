@@ -1,10 +1,18 @@
 // src/components/therapistProfile/ProfileHeader.tsx
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState } from 'react';
-import { Phone, Globe, CheckBadgeIcon as LucideCheckBadgeIcon, UserPlus, MapPin, Video, Users as UsersIcon } from 'lucide-react';
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import {
+  Phone,
+  Globe,
+  BadgeCheck as LucideCheckBadgeIcon,
+  UserPlus,
+  MapPin,
+  Video,
+  Users as UsersIcon,
+} from "lucide-react";
 
 interface ProfileHeaderProps {
   therapist: {
@@ -27,17 +35,26 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
   const isClaimedAndVerified = Boolean(therapist.userId);
-  const [imageSrc, setImageSrc] = useState(therapist.imageUrl || '/default-avatar.png');
+  const [imageSrc, setImageSrc] = useState(
+    therapist.imageUrl || "/default-avatar.png"
+  );
 
-  const credentials = [therapist.primaryCredential, therapist.primaryCredentialAlt].filter(Boolean).join(', ');
-  const locationString = [therapist.primaryCity, therapist.primaryState].filter(Boolean).join(', ');
+  const credentials = [
+    therapist.primaryCredential,
+    therapist.primaryCredentialAlt,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const locationString = [therapist.primaryCity, therapist.primaryState]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div className="relative text-center border border-gray-200 shadow-xl rounded-2xl bg-white overflow-hidden print:shadow-none">
       {/* UPDATED COVER IMAGE BACKGROUND */}
-      <div 
+      <div
         className="w-full h-36 sm:h-44 print:hidden"
-        style={{ backgroundColor: '#F1E9D5' }} // Using inline style for the specific beige
+        style={{ backgroundColor: "#F1E9D5" }} // Using inline style for the specific beige
         // Or, if you add to tailwind.config.js: className="bg-brand-beige-light"
       >
         {/* You could add a very subtle pattern or texture here if desired via CSS background-image */}
@@ -56,12 +73,12 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
         <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full mx-auto border-4 sm:border-[6px] border-white bg-gray-200 overflow-hidden shadow-lg">
           <Image
             src={imageSrc}
-            alt={`${therapist.name || 'Therapist'} - Profile Photo`}
+            alt={`${therapist.name || "Therapist"} - Profile Photo`}
             width={144}
             height={144}
             className="object-cover w-full h-full"
             priority
-            onError={() => setImageSrc('/default-avatar.png')}
+            onError={() => setImageSrc("/default-avatar.png")}
           />
         </div>
       </div>
@@ -69,9 +86,16 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
       <div className="pt-4 pb-6 sm:pb-8 px-4 sm:px-6">
         <div className="flex items-center justify-center gap-2 mb-1">
           {/* Increased font size for name */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">{therapist.name || "Therapist Profile"}</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">
+            {therapist.name || "Therapist Profile"}
+          </h1>
           {isClaimedAndVerified && (
-            <span title="Verified Profile" className="flex items-center text-teal-500 shrink-0"> {/* Kept teal for verified badge */}
+            <span
+              title="Verified Profile"
+              className="flex items-center text-teal-500 shrink-0"
+            >
+              {" "}
+              {/* Kept teal for verified badge */}
               <LucideCheckBadgeIcon size={26} className="fill-current" />
             </span>
           )}
@@ -85,27 +109,32 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
         )}
 
         {/* Location and Availability Info */}
-        <div className="mt-2 mb-3 sm:mb-4 text-sm sm:text-base text-gray-500 space-y-1"> {/* Base size for this info */}
-          
-          <div className="flex items-center justify-center gap-x-4 gap-y-1"> {/* Increased gap for clarity */}
+        <div className="mt-2 mb-3 sm:mb-4 text-sm sm:text-base text-gray-500 space-y-1">
+          {" "}
+          {/* Base size for this info */}
+          <div className="flex items-center justify-center gap-x-4 gap-y-1">
+            {" "}
+            {/* Increased gap for clarity */}
             {therapist.telehealth && (
               <div className="flex items-center gap-1.5">
-                <Video size={16} className="shrink-0 text-teal-600" /> {/* Teal icon for positive attribute */}
+                <Video size={16} className="shrink-0 text-teal-600" />{" "}
+                {/* Teal icon for positive attribute */}
                 <span>Teletherapy offered</span>
               </div>
             )}
             {therapist.inPerson && (
               <div className="flex items-center gap-1.5">
-                <UsersIcon size={16} className="shrink-0 text-blue-600" /> {/* Blue icon for in-person */}
+                <UsersIcon size={16} className="shrink-0 text-blue-600" />{" "}
+                {/* Blue icon for in-person */}
                 <span>In-Person Offered</span>
               </div>
             )}
             {locationString && (
-            <div className="flex items-center justify-center gap-1.5">
-              <MapPin size={16} className="shrink-0" />
-              <span>{locationString}</span>
-            </div>
-          )}
+              <div className="flex items-center justify-center gap-1.5">
+                <MapPin size={16} className="shrink-0" />
+                <span>{locationString}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,7 +149,7 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
         <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
           {therapist.phone && (
             <a
-              href={`tel:${therapist.phone.replace(/\D/g, '')}`}
+              href={`tel:${therapist.phone.replace(/\D/g, "")}`}
               className="flex-1 w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors shadow text-sm sm:text-base" // text-sm sm:text-base
             >
               <Phone size={18} /> Call
@@ -128,7 +157,11 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
           )}
           {therapist.website && (
             <a
-              href={therapist.website.startsWith('http') ? therapist.website : `https://${therapist.website}`}
+              href={
+                therapist.website.startsWith("http")
+                  ? therapist.website
+                  : `https://${therapist.website}`
+              }
               target="_blank"
               rel="noopener noreferrer nofollow"
               className="flex-1 w-full sm:w-auto inline-flex justify-center items-center gap-2 border border-teal-600 text-teal-700 px-6 py-3 rounded-lg font-semibold hover:bg-teal-50 transition-colors shadow-sm text-sm sm:text-base" // text-sm sm:text-base
@@ -137,7 +170,7 @@ export default function ProfileHeader({ therapist }: ProfileHeaderProps) {
             </a>
           )}
         </div>
-         {/* ... (contact info notices - keep as is) ... */}
+        {/* ... (contact info notices - keep as is) ... */}
       </div>
     </div>
   );

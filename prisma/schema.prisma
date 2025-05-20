@@ -8,15 +8,16 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
-
 enum Gender {
-  MALE
-  FEMALE
-  NON_BINARY        // Added
-  TRANSGENDER       // Added
-  OTHER
-  PREFER_NOT_TO_SAY
+  male
+  female
+  non_binary        // Updated to lowercase
+  transgender       // Updated to lowercase
+  other
+  prefer_not_to_say
 }
+ 
+ 
 
 enum LicenseStatus {
   licensed
@@ -80,7 +81,7 @@ model Therapist {
   freeConsultation     Boolean?
   feeComment           String?   @db.Text
   paymentMethods       String[]  @default([])
-  // insuranceAccepted    String[]  @default([]) // MODIFIED: Changed from String? to support multiple & 'has' query
+  // insuranceAccepted    String[] @default([])  // MODIFIED: Changed from String? to support multiple & 'has' query
 
   // --- Qualifications from Zod ---
   licenseStatus          LicenseStatus?

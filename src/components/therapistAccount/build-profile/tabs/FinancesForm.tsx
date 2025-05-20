@@ -134,13 +134,13 @@ export default function FinancesForm() {
       </div>
 
       {/* Insurance accepted */}
-      <SelectDropdown
+      {/* <SelectDropdown
         label="Insurance accepted"
         name="insuranceAccepted"
         options={insuranceOptions}
         register={register}
         error={errors.insuranceAccepted?.message}
-      />
+      /> */}
     </div>
   )
 }

@@ -1,26 +1,36 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Helper for optional numeric strings that should be numbers or null
-const optionalNumericStringOrEmpty = z.preprocess(
-  (val) => {
-    if (val === '' || val === null || val === undefined) return null;
-    const num = Number(val);
-    return isNaN(num) ? val : num; // Pass as is if NaN, Zod .number() will catch
-  },
-  z.number().nullable().optional()
-);
+const optionalNumericStringOrEmpty = z.preprocess((val) => {
+  if (val === "" || val === null || val === undefined) return null;
+  const num = Number(val);
+  return isNaN(num) ? val : num; // Pass as is if NaN, Zod .number() will catch
+}, z.number().nullable().optional());
 
-export const GENDER_OPTIONS = ["male", "female", "other", "prefer_not_to_say"] as const;
+export const GENDER_OPTIONS = [
+  "male",
+  "female",
+  "other",
+  "prefer_not_to_say",
+] as const;
 
 // Common modifier for optional strings that can also be empty strings OR NULL
-const optionalNullableString = z.string().nullable().optional().or(z.literal(''));
+const optionalNullableString = z
+  .string()
+  .nullable()
+  .optional()
+  .or(z.literal(""));
 
 // Specific for URLs that can also be null or empty
-const optionalNullableUrlString = z.string().url("Invalid URL format. Must include http(s):// if provided.").nullable().optional().or(z.literal(''));
+const optionalNullableUrlString = z
+  .string()
+  .url("Invalid URL format. Must include http(s):// if provided.")
+  .nullable()
+  .optional()
+  .or(z.literal(""));
 
 // Modifier for optional strings that CANNOT be null, but can be "" or undefined
-const optionalStringCannotBeNull = z.string().optional().or(z.literal(''));
-
+const optionalStringCannotBeNull = z.string().optional().or(z.literal(""));
 
 // 1. Basics Form
 export const basicsSchema = z.object({
@@ -29,7 +39,12 @@ export const basicsSchema = z.object({
   primaryCredentialAlt: optionalNullableString,
   gender: z.enum(GENDER_OPTIONS).nullable().optional(),
   phone: optionalNullableString, // Consider adding .regex() for phone format if desired
-  workEmail: z.string().email("Invalid email format if provided.").nullable().optional().or(z.literal('')),
+  workEmail: z
+    .string()
+    .email("Invalid email format if provided.")
+    .nullable()
+    .optional()
+    .or(z.literal("")),
   website: optionalNullableUrlString,
   imageUrl: optionalNullableUrlString,
   coverImageUrl: optionalNullableUrlString,
@@ -54,13 +69,14 @@ export type LocationFormValues = z.infer<typeof locationSchema>;
 
 // 3. Finances Form
 export const financesSchema = z.object({
-  feeIndividual: optionalNullableString, // Handles values like "$150", "120-180", "Contact"
-  feeCouples: optionalNullableString,
+  feeIndividual: optionalNumericStringOrEmpty, // Handles values like "$150", "120-180", "Contact"
+  feeCouples: optionalNumericStringOrEmpty,
   slidingScale: z.boolean().nullable().optional(),
   freeConsultation: z.boolean().nullable().optional(),
   feeComment: optionalNullableString,
   paymentMethods: z.array(z.string()).optional().default([]),
-  insuranceAccepted: optionalNullableString, // Stores the name of the insurance plan as a string
+  // insuranceAccepted: z.array(z.string()).optional().default([]),
+  // Stores the name of the insurance plan as a string
 });
 export type FinancesFormValues = z.infer<typeof financesSchema>;
 
@@ -71,11 +87,16 @@ export const personalStatementSchema = z.object({
   personalStatement2: optionalNullableString,
   personalStatement3: optionalNullableString,
 });
-export type PersonalStatementFormValues = z.infer<typeof personalStatementSchema>;
+export type PersonalStatementFormValues = z.infer<
+  typeof personalStatementSchema
+>;
 
 // 5. Qualifications Form
 export const qualificationsSchema = z.object({
-  licenseStatus: z.enum(['licensed', 'pre-licensed', 'none']).nullable().optional(),
+  licenseStatus: z
+    .enum(["licensed", "pre-licensed", "none"])
+    .nullable()
+    .optional(),
   profession: optionalNullableString, // Role, e.g., "Psychotherapist", "Counselor"
   licenseNumber: optionalNullableString,
   licenseState: optionalNullableString, // e.g., "CA", "NY"
@@ -91,14 +112,18 @@ export type QualificationsFormValues = z.infer<typeof qualificationsSchema>;
 // 6. Specialties Form
 export const specialtiesSchema = z.object({
   issues: z.array(z.string()).optional().default([]), // Main list of issues therapist treats
-  topIssues: z.array(z.string()).max(3, "Select up to 3 top issues.").optional().default([]), // User-selected top 3
+  topIssues: z
+    .array(z.string())
+    .max(3, "Select up to 3 top issues.")
+    .optional()
+    .default([]), // User-selected top 3
   specialtyDescription: optionalNullableString,
   mentalHealthInterests: z.array(z.string()).optional().default([]), // Add to Prisma if persisting
-  sexualityInterests: z.array(z.string()).optional().default([]),    // Add to Prisma if persisting
+  sexualityInterests: z.array(z.string()).optional().default([]), // Add to Prisma if persisting
   ages: z.array(z.string()).optional().default([]),
   participants: z.array(z.string()).optional().default([]),
   communities: z.array(z.string()).optional().default([]),
-  faithInterests: z.array(z.string()).optional().default([]),        // Add to Prisma if persisting
+  faithInterests: z.array(z.string()).optional().default([]), // Add to Prisma if persisting
   languages: z.array(z.string()).optional().default([]),
 });
 export type SpecialtiesFormValues = z.infer<typeof specialtiesSchema>;
@@ -110,7 +135,6 @@ export const treatmentStyleSchema = z.object({
 });
 export type TreatmentStyleFormValues = z.infer<typeof treatmentStyleSchema>;
 
-
 // --- Full Merged Therapist Profile Schema ---
 export const fullTherapistSchema = basicsSchema
   .merge(locationSchema)
@@ -120,8 +144,8 @@ export const fullTherapistSchema = basicsSchema
   .merge(specialtiesSchema)
   .merge(treatmentStyleSchema)
   .extend({
-    id: z.string().cuid().optional(), // CUID if it's a new record, string if existing
-    slug: z.string().nullable().optional().or(z.literal('')),
+    id: z.string().uuid().optional(), // CUID if it's a new record, string if existing
+    slug: z.string().nullable().optional().or(z.literal("")),
     published: z.boolean().default(false).optional(),
     // userId: z.string().cuid() // Example: if you link therapist profiles to a User model
   });
@@ -132,11 +156,11 @@ export type FullTherapistProfile = z.infer<typeof fullTherapistSchema>;
 export const defaultFormData: FullTherapistProfile = {
   // Top-level
   id: undefined,
-  slug: '', // Cannot be null, as per schema (optional().or(z.literal('')))
+  slug: "", // Cannot be null, as per schema (optional().or(z.literal('')))
   published: false,
 
   // Basics
-  name: '', // Cannot be null, as per optionalStringCannotBeNull
+  name: "", // Cannot be null, as per optionalStringCannotBeNull
   primaryCredential: null,
   primaryCredentialAlt: null,
   gender: null, // Can be null
@@ -156,17 +180,17 @@ export const defaultFormData: FullTherapistProfile = {
   additionalState: null,
   additionalZip: null,
   telehealth: null, // Or false if that's a more active default
-  inPerson: null,   // Or false
+  inPerson: null, // Or false
   locationDescription: null,
 
   // Finances
-  feeIndividual: '', // Empty string is fine for optionalNullableString
-  feeCouples: '',
+  feeIndividual: null, // Empty string is fine for optionalNullableString
+  feeCouples: null,
   slidingScale: null, // Or false
   freeConsultation: null, // Or false
-  feeComment: '',
+  feeComment: "",
   paymentMethods: [],
-  insuranceAccepted: '', // Or null
+  // insuranceAccepted: [], // Or null
 
   // Personal Statement
   tagline: null,

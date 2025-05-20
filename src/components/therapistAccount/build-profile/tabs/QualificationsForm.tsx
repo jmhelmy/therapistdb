@@ -47,10 +47,10 @@ export default function QualificationsForm() {
     licenseState?: string
     licenseExpirationMonth?: string
     licenseExpirationYear?: string
-    schoolName?: string
-    degree?: string
-    graduationYear?: string
-    yearsInPractice?: string
+    educationSchool?: string
+    educationDegree?: string
+    educationYearGraduated?: string
+    practiceStartYear?: string
   }>()
 
   return (
@@ -119,23 +119,23 @@ export default function QualificationsForm() {
       </div>
 
       <TextField
-        name="schoolName"
+        name="educationSchool"
         register={register}
         label="School Name (optional)"
         placeholder="Most recently graduated"
-        error={errors.schoolName?.message}
+        error={errors.educationSchool?.message}
       />
 
       <TextField
-        name="degree"
+        name="educationDegree"
         register={register}
         label="Degree / Diploma (optional)"
         placeholder="e.g. M.A. in Clinical Psychology"
-        error={errors.degree?.message}
+        error={errors.educationDegree?.message}
       />
 
       <TextField
-        name="graduationYear"
+        name="educationYearGraduated"
         format={(value) => {
           if (value === '') {
             return null
@@ -149,11 +149,11 @@ export default function QualificationsForm() {
         register={register}
         label="Year Graduated (optional)"
         placeholder="e.g. 2018"
-        error={errors.graduationYear?.message}
+        error={errors.educationYearGraduated?.message}
       />
 
       <TextField
-        name="yearsInPractice"
+        name="practiceStartYear"
         format={(value) => {
           if (value === '') {
             return null
@@ -167,7 +167,7 @@ export default function QualificationsForm() {
         register={register}
         label="Years in Practice (optional)"
         placeholder="e.g. 5"
-        error={errors.yearsInPractice?.message}
+        error={errors.practiceStartYear?.message}
       />
     </div>
   )

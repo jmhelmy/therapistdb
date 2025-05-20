@@ -74,22 +74,22 @@ export default function SpecialtiesForm() {
       <CheckboxGroup
         label="Client Concerns"
         items={['Anxiety', 'Depression', 'Trauma', 'Self-Esteem']}
-        field="clientConcerns"
+        field="issues"
       />
       <CheckboxGroup
         label="Top Concerns (up to 3)"
         items={['Anxiety', 'Depression', 'Grief']}
-        field="topConcerns"
+        field="topIssues"
       />
       <CheckboxGroup
         label="Mental Health"
         items={['ADHD', 'Bipolar', 'OCD']}
-        field="mentalHealth"
+        field="mentalHealthInterests"
       />
       <CheckboxGroup
         label="Sexuality"
         items={['Heterosexual', 'Gay', 'Bisexual']}
-        field="sexuality"
+        field="sexualityInterests"
       />
       <CheckboxGroup
         label="Ages"
@@ -109,7 +109,7 @@ export default function SpecialtiesForm() {
       <CheckboxGroup
         label="Faith"
         items={['Christian', 'Jewish', 'Muslim']}
-        field="faith"
+        field="faithInterests"
       />
       <CheckboxGroup
         label="Languages"
