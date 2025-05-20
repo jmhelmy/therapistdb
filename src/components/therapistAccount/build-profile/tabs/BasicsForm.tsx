@@ -56,7 +56,7 @@ export default function BasicsForm() {
             // currentImageUrl={watch('imageUrl')}
             // Responsive placeholder size:
             placeholderClassName="w-28 h-36 sm:w-32 sm:h-40 md:w-36 md:h-48 bg-slate-200 rounded-lg shadow-lg border-2 border-white"
-            placeholderIcon={<Camera size={32} sm:size={40} className="text-slate-400" />} // Responsive icon size
+            placeholderIcon={<Camera size={32} className="text-slate-400" />} // Responsive icon size
             placeholderText="Upload Photo"
             placeholderTextClassName="text-xs sm:text-sm" // Responsive text size
           />
@@ -83,7 +83,7 @@ export default function BasicsForm() {
       <div className={`bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-gray-200 shadow-md space-y-4 sm:space-y-6 ${ (errors.coverImageUrl || errors.imageUrl) ? 'mt-4' : 'mt-[70px] sm:mt-[80px]' }`}>
         {/* Adjusted top margin to mt-4 if errors are present, or a larger margin to clear the photo if no image errors */}
         <div className="flex items-center space-x-3 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-200">
-          <User size={24} sm:size={28} className="text-teal-600" /> {/* Using Lucide User icon */}
+          <User size={24} className="text-teal-600" /> {/* Using Lucide User icon */}
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Basics</h2>
         </div>
 
